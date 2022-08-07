@@ -123,7 +123,7 @@ class WebhookAdapter:
     ) -> Any:
         headers: Dict[str, str] = {}
         files = files or []
-        to_send: Optional[Union[str, Dict[str, Any]]] = None
+        to_send: Optional[Union[str, bytes, Dict[str, Any]]] = None
         bucket = (route.webhook_id, route.webhook_token)
 
         try:
@@ -132,8 +132,8 @@ class WebhookAdapter:
             self._locks[bucket] = lock = threading.Lock()
 
         if payload is not None:
-            headers['Content-Type'] = 'application/json'
-            to_send = utils._to_json(payload)
+            headers['Content-Type'] = 'application/json; charset=utf-8'
+            to_send = utils._to_json(payload).encode('utf-8')
 
         if auth_token is not None:
             headers['Authorization'] = f'Bot {auth_token}'
@@ -178,14 +178,20 @@ class WebhookAdapter:
                         response.status = response.status_code  # type: ignore
 
                         data = response.text or None
-                        if data and response.headers['Content-Type'] == 'application/json':
-                            data = json.loads(data)
+                        try:
+                            if data and response.headers['Content-Type'] == 'application/json':
+                                data = json.loads(data)
+                        except KeyError:
+                            pass
 
                         remaining = response.headers.get('X-Ratelimit-Remaining')
                         if remaining == '0' and response.status_code != 429:
                             delta = utils._parse_ratelimit_header(response)
                             _log.debug(
-                                'Webhook ID %s has been pre-emptively rate limited, waiting %.2f seconds', webhook_id, delta
+                                'Webhook ID %s has exhausted its rate limit bucket (bucket: %s, retry: %s).',
+                                webhook_id,
+                                bucket,
+                                delta,
                             )
                             lock.delay_by(delta)
 
@@ -195,9 +201,10 @@ class WebhookAdapter:
                         if response.status_code == 429:
                             if not response.headers.get('Via'):
                                 raise HTTPException(response, data)
+                            fmt = 'Webhook ID %s is rate limited. Retrying in %.2f seconds. Handled under the bucket %s'
 
                             retry_after: float = data['retry_after']  # type: ignore
-                            _log.warning('Webhook ID %s is rate limited. Retrying in %.2f seconds', webhook_id, retry_after)
+                            _log.warning(fmt, webhook_id, retry_after, stack_info=True)
                             time.sleep(retry_after)
                             continue
 
@@ -399,6 +406,7 @@ class SyncWebhookMessage(Message):
 
     def edit(
         self,
+        *,
         content: Optional[str] = MISSING,
         embeds: Sequence[Embed] = MISSING,
         embed: Optional[Embed] = MISSING,
@@ -842,7 +850,7 @@ class SyncWebhook(BaseWebhook):
     def _create_message(self, data: MessagePayload, *, thread: Snowflake = MISSING) -> SyncWebhookMessage:
         state = _WebhookState(self, parent=self._state, thread=thread)
         # state may be artificial (unlikely at this point...)
-        channel = self.channel or PartialMessageable(state=self._state, id=int(data['channel_id']))  # type: ignore
+        channel = self.channel or PartialMessageable(state=self._state, guild_id=self.guild_id, id=int(data['channel_id']))  # type: ignore
         # state is artificial
         return SyncWebhookMessage(data=data, state=state, channel=channel)  # type: ignore
 
@@ -860,6 +868,7 @@ class SyncWebhook(BaseWebhook):
         embeds: Sequence[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         thread: Snowflake = MISSING,
+        thread_name: str = MISSING,
         wait: Literal[True],
         suppress_embeds: bool = MISSING,
     ) -> SyncWebhookMessage:
@@ -879,6 +888,7 @@ class SyncWebhook(BaseWebhook):
         embeds: Sequence[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         thread: Snowflake = MISSING,
+        thread_name: str = MISSING,
         wait: Literal[False] = ...,
         suppress_embeds: bool = MISSING,
     ) -> None:
@@ -897,6 +907,7 @@ class SyncWebhook(BaseWebhook):
         embeds: Sequence[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         thread: Snowflake = MISSING,
+        thread_name: str = MISSING,
         wait: bool = False,
         suppress_embeds: bool = False,
     ) -> Optional[SyncWebhookMessage]:
@@ -947,6 +958,13 @@ class SyncWebhook(BaseWebhook):
             The thread to send this message to.
 
             .. versionadded:: 2.0
+        thread_name: :class:`str`
+            The thread name to create with this webhook if the webhook belongs
+            to a :class:`~discord.ForumChannel`. Note that this is mutually
+            exclusive with the ``thread`` parameter, as this will create a
+            new thread with the given name.
+
+            .. versionadded:: 2.0
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This sends the message without any embeds if set to ``True``.
 
@@ -962,6 +980,7 @@ class SyncWebhook(BaseWebhook):
             The authorization token for the webhook is incorrect.
         TypeError
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            or ``thread`` and ``thread_name``.
         ValueError
             The length of ``embeds`` was invalid or
             there was no token associated with this webhook.
@@ -984,6 +1003,9 @@ class SyncWebhook(BaseWebhook):
         else:
             flags = MISSING
 
+        if thread_name is not MISSING and thread is not MISSING:
+            raise TypeError('Cannot mix thread_name and thread keyword arguments.')
+
         params = handle_message_parameters(
             content=content,
             username=username,
@@ -993,6 +1015,7 @@ class SyncWebhook(BaseWebhook):
             files=files,
             embed=embed,
             embeds=embeds,
+            thread_name=thread_name,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
             flags=flags,
@@ -1158,7 +1181,7 @@ class SyncWebhook(BaseWebhook):
         ------------
         message_id: :class:`int`
             The message ID to delete.
-        hread: :class:`~discord.abc.Snowflake`
+        thread: :class:`~discord.abc.Snowflake`
             The thread the webhook message belongs to.
 
             .. versionadded:: 2.0

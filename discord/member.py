@@ -28,7 +28,7 @@ import datetime
 import inspect
 import itertools
 from operator import attrgetter
-from typing import Any, Awaitable, Callable, Collection, Dict, List, Optional, TYPE_CHECKING, Tuple, Union, Type
+from typing import Any, Awaitable, Callable, Collection, Dict, List, Optional, TYPE_CHECKING, Tuple, TypeVar, Union
 
 import discord.abc
 
@@ -47,6 +47,8 @@ __all__ = (
     'VoiceState',
     'Member',
 )
+
+T = TypeVar('T', bound=type)
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -205,7 +207,7 @@ class _ClientStatus:
         return self
 
 
-def flatten_user(cls: Any) -> Type[Member]:
+def flatten_user(cls: T) -> T:
     for attr, value in itertools.chain(BaseUser.__dict__.items(), User.__dict__.items()):
         # ignore private/special methods
         if attr.startswith('_'):
@@ -549,10 +551,24 @@ class Member(discord.abc.Messageable, _UserTag):
         return result
 
     @property
+    def display_icon(self) -> Optional[Union[str, Asset]]:
+        """Optional[Union[:class:`str`, :class:`Asset`]]: A property that returns the role icon that is rendered for
+        this member. If no icon is shown then ``None`` is returned.
+
+        .. versionadded:: 2.0
+        """
+
+        roles = self.roles[1:]  # remove @everyone
+        for role in reversed(roles):
+            icon = role.display_icon
+            if icon:
+                return icon
+
+        return None
+
+    @property
     def mention(self) -> str:
         """:class:`str`: Returns a string that allows you to mention the member."""
-        if self.nick:
-            return f'<@!{self._user.id}>'
         return f'<@{self._user.id}>'
 
     @property
@@ -944,7 +960,7 @@ class Member(discord.abc.Messageable, _UserTag):
         Raises
         -------
         TypeError
-            The ``until`` parameter was the wrong type of the datetime was not timezone-aware.
+            The ``until`` parameter was the wrong type or the datetime was not timezone-aware.
         """
 
         if until is None:

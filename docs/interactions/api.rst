@@ -121,12 +121,36 @@ AppCommandThread
 .. autoclass:: discord.app_commands.AppCommandThread()
     :members:
 
+AppCommandPermissions
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: discord.app_commands.AppCommandPermissions
+
+.. autoclass:: discord.app_commands.AppCommandPermissions()
+    :members:
+
+GuildAppCommandPermissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: discord.app_commands.GuildAppCommandPermissions
+
+.. autoclass:: discord.app_commands.GuildAppCommandPermissions()
+    :members:
+
 Argument
 ~~~~~~~~~~
 
 .. attributetable:: discord.app_commands.Argument
 
 .. autoclass:: discord.app_commands.Argument()
+    :members:
+
+AllChannels
+~~~~~~~~~~~~
+
+.. attributetable:: discord.app_commands.AllChannels
+
+.. autoclass:: discord.app_commands.AllChannels()
     :members:
 
 Data Classes
@@ -352,6 +376,22 @@ Enumerations
 
         A message context menu command.
 
+.. class:: AppCommandPermissionType
+
+    The application command's permission type.
+
+    .. versionadded:: 2.0
+
+    .. attribute:: role
+
+        The permission is for a role.
+    .. attribute:: channel
+
+        The permission is for one or all channels.
+    .. attribute:: user
+
+        The permission is for a user.
+
 .. _discord_ui_kit:
 
 Bot UI Kit
@@ -482,6 +522,12 @@ Decorators
 .. autofunction:: discord.app_commands.guilds
     :decorator:
 
+.. autofunction:: discord.app_commands.guild_only
+    :decorator:
+
+.. autofunction:: discord.app_commands.default_permissions
+    :decorator:
+
 Checks
 ~~~~~~~
 
@@ -550,6 +596,52 @@ Range
 .. autoclass:: discord.app_commands.Range
     :members:
 
+Translations
+~~~~~~~~~~~~~
+
+Translator
++++++++++++
+
+.. attributetable:: discord.app_commands.Translator
+
+.. autoclass:: discord.app_commands.Translator
+    :members:
+
+locale_str
++++++++++++
+
+.. attributetable:: discord.app_commands.locale_str
+
+.. autoclass:: discord.app_commands.locale_str
+    :members:
+
+TranslationContext
++++++++++++++++++++
+
+.. class:: TranslationContext
+    :module: discord.app_commands
+
+    An enum representing the context that the translation occurs in when requested for translation.
+
+    .. versionadded:: 2.0
+
+    .. attribute:: command_name
+
+        The translation involved a command name.
+    .. attribute:: command_description
+
+        The translation involved a command description.
+    .. attribute:: parameter_name
+
+        The translation involved a parameter name.
+    .. attribute:: parameter_description
+
+        The translation involved a parameter description.
+    .. attribute:: choice_name
+
+        The translation involved a choice name.
+
+
 Exceptions
 ~~~~~~~~~~~
 
@@ -560,6 +652,9 @@ Exceptions
     :members:
 
 .. autoexception:: discord.app_commands.TransformerError
+    :members:
+
+.. autoexception:: discord.app_commands.TranslationError
     :members:
 
 .. autoexception:: discord.app_commands.CheckFailure
@@ -595,6 +690,9 @@ Exceptions
 .. autoexception:: discord.app_commands.CommandNotFound
     :members:
 
+.. autoexception:: discord.app_commands.MissingApplicationID
+    :members:
+
 Exception Hierarchy
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -604,6 +702,7 @@ Exception Hierarchy
         - :exc:`~discord.app_commands.AppCommandError`
             - :exc:`~discord.app_commands.CommandInvokeError`
             - :exc:`~discord.app_commands.TransformerError`
+            - :exc:`~discord.app_commands.TranslationError`
             - :exc:`~discord.app_commands.CheckFailure`
                 - :exc:`~discord.app_commands.NoPrivateMessage`
                 - :exc:`~discord.app_commands.MissingRole`
@@ -615,3 +714,4 @@ Exception Hierarchy
             - :exc:`~discord.app_commands.CommandAlreadyRegistered`
             - :exc:`~discord.app_commands.CommandSignatureMismatch`
             - :exc:`~discord.app_commands.CommandNotFound`
+            - :exc:`~discord.app_commands.MissingApplicationID`

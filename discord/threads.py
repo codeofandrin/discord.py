@@ -24,13 +24,14 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Callable, Dict, Iterable, List, Optional, Union, TYPE_CHECKING
+from typing import Callable, Dict, Iterable, List, Literal, Optional, Union, TYPE_CHECKING
 from datetime import datetime
 
 from .mixins import Hashable
 from .abc import Messageable, _purge_helper
 from .enums import ChannelType, try_enum
 from .errors import ClientException
+from .flags import ChannelFlags
 from .utils import MISSING, parse_time, _get_as_snowflake
 
 __all__ = (
@@ -49,13 +50,15 @@ if TYPE_CHECKING:
     )
     from .types.snowflake import SnowflakeList
     from .guild import Guild
-    from .channel import TextChannel, CategoryChannel
+    from .channel import TextChannel, CategoryChannel, ForumChannel
     from .member import Member
     from .message import Message, PartialMessage
     from .abc import Snowflake, SnowflakeTime
     from .role import Role
     from .permissions import Permissions
     from .state import ConnectionState
+
+    ThreadChannelType = Literal[ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread]
 
 
 class Thread(Messageable, Hashable):
@@ -88,9 +91,9 @@ class Thread(Messageable, Hashable):
     guild: :class:`Guild`
         The guild the thread belongs to.
     id: :class:`int`
-        The thread ID.
+        The thread ID. This is the same as the thread starter message ID.
     parent_id: :class:`int`
-        The parent :class:`TextChannel` ID this thread belongs to.
+        The parent :class:`TextChannel` or :class:`ForumChannel` ID this thread belongs to.
     owner_id: :class:`int`
         The user's ID that created this thread.
     last_message_id: Optional[:class:`int`]
@@ -145,6 +148,7 @@ class Thread(Messageable, Hashable):
         'auto_archive_duration',
         'archive_timestamp',
         '_created_at',
+        '_flags',
     )
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload) -> None:
@@ -170,11 +174,12 @@ class Thread(Messageable, Hashable):
         self.parent_id: int = int(data['parent_id'])
         self.owner_id: int = int(data['owner_id'])
         self.name: str = data['name']
-        self._type: ChannelType = try_enum(ChannelType, data['type'])
+        self._type: ThreadChannelType = try_enum(ChannelType, data['type'])  # type: ignore
         self.last_message_id: Optional[int] = _get_as_snowflake(data, 'last_message_id')
         self.slowmode_delay: int = data.get('rate_limit_per_user', 0)
         self.message_count: int = data['message_count']
         self.member_count: int = data['member_count']
+        self._flags: int = data.get('flags', 0)
         self._unroll_metadata(data['thread_metadata'])
 
         self.me: Optional[ThreadMember]
@@ -208,14 +213,19 @@ class Thread(Messageable, Hashable):
             pass
 
     @property
-    def type(self) -> ChannelType:
+    def type(self) -> ThreadChannelType:
         """:class:`ChannelType`: The channel's Discord type."""
         return self._type
 
     @property
-    def parent(self) -> Optional[TextChannel]:
-        """Optional[:class:`TextChannel`]: The parent channel this thread belongs to."""
+    def parent(self) -> Optional[Union[ForumChannel, TextChannel]]:
+        """Optional[Union[:class:`ForumChannel`, :class:`TextChannel`]]: The parent channel this thread belongs to."""
         return self.guild.get_channel(self.parent_id)  # type: ignore
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`ChannelFlags`: The flags associated with this thread."""
+        return ChannelFlags._from_value(self._flags)
 
     @property
     def owner(self) -> Optional[Member]:
@@ -228,6 +238,14 @@ class Thread(Messageable, Hashable):
         return f'<#{self.id}>'
 
     @property
+    def jump_url(self) -> str:
+        """:class:`str`: Returns a URL that allows the client to jump to the thread.
+
+        .. versionadded:: 2.0
+        """
+        return f'https://discord.com/channels/{self.guild.id}/{self.id}'
+
+    @property
     def members(self) -> List[ThreadMember]:
         """List[:class:`ThreadMember`]: A list of thread members in this thread.
 
@@ -238,8 +256,23 @@ class Thread(Messageable, Hashable):
         return list(self._members.values())
 
     @property
+    def starter_message(self) -> Optional[Message]:
+        """Returns the thread starter message from the cache.
+
+        The message might not be cached, valid, or point to an existing message.
+
+        Note that the thread starter message ID is the same ID as the thread.
+
+        Returns
+        --------
+        Optional[:class:`Message`]
+            The thread starter message or ``None`` if not found.
+        """
+        return self._state._get_message(self.id)
+
+    @property
     def last_message(self) -> Optional[Message]:
-        """Fetches the last message from this channel in cache.
+        """Returns the last message from this thread from the cache.
 
         The message might not be valid or point to an existing message.
 
@@ -425,7 +458,7 @@ class Thread(Messageable, Hashable):
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
         around: Optional[SnowflakeTime] = None,
-        oldest_first: Optional[bool] = False,
+        oldest_first: Optional[bool] = None,
         bulk: bool = True,
         reason: Optional[str] = None,
     ) -> List[Message]:
@@ -506,8 +539,10 @@ class Thread(Messageable, Hashable):
         archived: bool = MISSING,
         locked: bool = MISSING,
         invitable: bool = MISSING,
+        pinned: bool = MISSING,
         slowmode_delay: int = MISSING,
         auto_archive_duration: ThreadArchiveDuration = MISSING,
+        reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
 
@@ -528,6 +563,8 @@ class Thread(Messageable, Hashable):
             Whether to archive the thread or not.
         locked: :class:`bool`
             Whether to lock the thread or not.
+        pinned: :class:`bool`
+            Whether to pin the thread or not. This only works if the thread is part of a forum.
         invitable: :class:`bool`
             Whether non-moderators can add other non-moderators to this thread.
             Only available for private threads.
@@ -537,6 +574,8 @@ class Thread(Messageable, Hashable):
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for user in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+        reason: Optional[:class:`str`]
+            The reason for editing this thread. Shows up on the audit log.
 
         Raises
         -------
@@ -563,8 +602,12 @@ class Thread(Messageable, Hashable):
             payload['invitable'] = invitable
         if slowmode_delay is not MISSING:
             payload['rate_limit_per_user'] = slowmode_delay
+        if pinned is not MISSING:
+            flags = self.flags
+            flags.pinned = pinned
+            payload['flags'] = flags.value
 
-        data = await self._state.http.edit_channel(self.id, **payload)
+        data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload
         return Thread(data=data, state=self._state, guild=self.guild)  # type: ignore
 
@@ -723,10 +766,10 @@ class Thread(Messageable, Hashable):
 
         return PartialMessage(channel=self, id=message_id)
 
-    def _add_member(self, member: ThreadMember) -> None:
+    def _add_member(self, member: ThreadMember, /) -> None:
         self._members[member.id] = member
 
-    def _pop_member(self, member_id: int) -> Optional[ThreadMember]:
+    def _pop_member(self, member_id: int, /) -> Optional[ThreadMember]:
         return self._members.pop(member_id, None)
 
 

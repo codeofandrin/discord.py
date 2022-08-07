@@ -40,6 +40,7 @@ from .colour import *
 from .integrations import *
 from .invite import *
 from .template import *
+from .welcome_screen import *
 from .widget import *
 from .object import *
 from .reaction import *
@@ -66,6 +67,7 @@ from .scheduled_event import *
 from .interactions import *
 from .components import *
 from .threads import *
+from .automod import *
 
 
 class VersionInfo(NamedTuple):
