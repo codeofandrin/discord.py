@@ -26,12 +26,14 @@ from __future__ import annotations
 from datetime import datetime
 
 from .errors import MissingApplicationID
-from .translator import Translator, TranslationContext, locale_str
+from .translator import TranslationContextLocation, Translator, TranslationContext, locale_str
 from ..permissions import Permissions
 from ..enums import AppCommandOptionType, AppCommandType, AppCommandPermissionType, ChannelType, Locale, try_enum
 from ..mixins import Hashable
 from ..utils import _get_as_snowflake, parse_time, snowflake_time, MISSING
 from ..object import Object
+from ..role import Role
+from ..member import Member
 
 from typing import Any, Dict, Generic, List, TYPE_CHECKING, Optional, TypeVar, Union
 
@@ -75,9 +77,7 @@ if TYPE_CHECKING:
     from ..guild import GuildChannel, Guild
     from ..channel import TextChannel
     from ..threads import Thread
-    from ..role import Role
     from ..user import User
-    from ..member import Member
 
     ApplicationCommandParent = Union['AppCommand', 'AppCommandGroup']
 
@@ -463,9 +463,10 @@ class Choice(Generic[ChoiceT]):
     async def get_translated_payload(self, translator: Translator) -> Dict[str, Any]:
         base = self.to_dict()
         name_localizations: Dict[str, str] = {}
+        context = TranslationContext(location=TranslationContextLocation.choice_name, data=self)
         if self._locale_name:
             for locale in Locale:
-                translation = await translator._checked_translate(self._locale_name, locale, TranslationContext.choice_name)
+                translation = await translator._checked_translate(self._locale_name, locale, context)
                 if translation is not None:
                     name_localizations[locale.value] = translation
 
@@ -991,9 +992,11 @@ class AppCommandPermissions:
         self.permission: bool = data['permission']
 
         _object = None
+        _type = MISSING
 
         if self.type is AppCommandPermissionType.user:
             _object = guild.get_member(self.id) or self._state.get_user(self.id)
+            _type = Member
         elif self.type is AppCommandPermissionType.channel:
             if self.id == (guild.id - 1):
                 _object = AllChannels(guild)
@@ -1001,9 +1004,10 @@ class AppCommandPermissions:
                 _object = guild.get_channel(self.id)
         elif self.type is AppCommandPermissionType.role:
             _object = guild.get_role(self.id)
+            _type = Role
 
         if _object is None:
-            _object = Object(id=self.id)
+            _object = Object(id=self.id, type=_type)
 
         self.target: Union[Object, User, Member, Role, AllChannels, GuildChannel] = _object
 
