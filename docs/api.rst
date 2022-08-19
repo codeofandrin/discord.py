@@ -215,6 +215,18 @@ App Commands
     :param payload: The raw event payload data.
     :type payload: :class:`RawAppCommandPermissionsUpdateEvent`
 
+.. function:: on_app_command_completion(interaction, command)
+
+    Called when a :class:`app_commands.Command` or :class:`app_commands.ContextMenu` has
+    successfully completed without error.
+
+    .. versionadded:: 2.0
+
+    :param interaction: The interaction of the command.
+    :type interaction: :class:`Interaction`
+    :param command: The command that completed successfully
+    :type command: Union[:class:`app_commands.Command`, :class:`app_commands.ContextMenu`]
+
 AutoMod
 ~~~~~~~~
 
@@ -1358,7 +1370,11 @@ Utility Functions
 
 .. autofunction:: discord.utils.get
 
+.. autofunction:: discord.utils.setup_logging
+
 .. autofunction:: discord.utils.snowflake_time
+
+.. autofunction:: discord.utils.time_snowflake
 
 .. autofunction:: discord.utils.oauth_url
 
@@ -3108,6 +3124,11 @@ of :class:`enum.Enum`.
     .. attribute:: keyword_preset
 
         The rule will trigger when something triggers based on the set keyword preset types.
+
+    .. attribute:: mention_spam
+
+        The rule will trigger when combined number of role and user mentions
+        is greater than the set limit.
 
 .. class:: AutoModRuleEventType
 

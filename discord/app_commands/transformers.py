@@ -46,7 +46,7 @@ from typing import (
 
 from .errors import AppCommandError, TransformerError
 from .models import AppCommandChannel, AppCommandThread, Choice
-from .translator import TranslationContextLocation, locale_str, Translator, TranslationContext
+from .translator import TranslationContextLocation, TranslationContext, Translator, locale_str
 from ..channel import StageChannel, VoiceChannel, TextChannel, CategoryChannel
 from ..abc import GuildChannel
 from ..threads import Thread
@@ -749,9 +749,6 @@ def get_supported_annotation(
 
     if isinstance(annotation, Transformer):
         return (annotation, MISSING, False)
-
-    if hasattr(annotation, '__metadata__'):
-        return get_supported_annotation(annotation.__metadata__[0])
 
     if inspect.isclass(annotation):
         if issubclass(annotation, Transformer):

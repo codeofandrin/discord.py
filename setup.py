@@ -39,20 +39,21 @@ extras_require = {
         'sphinx==4.4.0',
         'sphinxcontrib_trio==1.1.2',
         'sphinxcontrib-websupport',
-        'typing-extensions',
+        'typing-extensions>=4.3,<5',
     ],
     'speed': [
         'orjson>=3.5.4',
         'aiodns>=1.1',
         'Brotli',
-        'cchardet',
+        'cchardet==2.1.7; python_version < "3.10"',
     ],
     'test': [
         'coverage[toml]',
         'pytest',
         'pytest-asyncio',
         'pytest-cov',
-        'pytest-mock'
+        'pytest-mock',
+        'typing-extensions>=4.3,<5',
     ]
 }
 
