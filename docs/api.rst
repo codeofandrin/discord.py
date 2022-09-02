@@ -3988,8 +3988,12 @@ User
 AutoMod
 ~~~~~~~
 
+.. attributetable:: AutoModRule
+
 .. autoclass:: AutoModRule()
     :members:
+
+.. attributetable:: AutoModAction
 
 .. autoclass:: AutoModAction()
     :members:
@@ -4073,20 +4077,32 @@ ScheduledEvent
 Integration
 ~~~~~~~~~~~~
 
+.. attributetable:: Integration
+
 .. autoclass:: Integration()
     :members:
+
+.. attributetable:: IntegrationAccount
 
 .. autoclass:: IntegrationAccount()
     :members:
 
+.. attributetable:: BotIntegration
+
 .. autoclass:: BotIntegration()
     :members:
+
+.. attributetable:: IntegrationApplication
 
 .. autoclass:: IntegrationApplication()
     :members:
 
+.. attributetable:: StreamIntegration
+
 .. autoclass:: StreamIntegration()
     :members:
+
+.. attributetable:: PartialIntegration
 
 .. autoclass:: PartialIntegration()
     :members:
@@ -4379,6 +4395,14 @@ GuildSticker
 .. attributetable:: GuildSticker
 
 .. autoclass:: GuildSticker()
+    :members:
+
+ShardInfo
+~~~~~~~~~~~
+
+.. attributetable:: ShardInfo
+
+.. autoclass:: ShardInfo()
     :members:
 
 RawMessageDeleteEvent
@@ -4694,20 +4718,12 @@ PermissionOverwrite
 .. autoclass:: PermissionOverwrite
     :members:
 
-ShardInfo
-~~~~~~~~~~~
-
-.. attributetable:: ShardInfo
-
-.. autoclass:: ShardInfo()
-    :members:
-
 SystemChannelFlags
 ~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: SystemChannelFlags
 
-.. autoclass:: SystemChannelFlags()
+.. autoclass:: SystemChannelFlags
     :members:
 
 MessageFlags
@@ -4715,7 +4731,7 @@ MessageFlags
 
 .. attributetable:: MessageFlags
 
-.. autoclass:: MessageFlags()
+.. autoclass:: MessageFlags
     :members:
 
 PublicUserFlags
@@ -4723,8 +4739,18 @@ PublicUserFlags
 
 .. attributetable:: PublicUserFlags
 
-.. autoclass:: PublicUserFlags()
+.. autoclass:: PublicUserFlags
     :members:
+
+
+ForumTag
+~~~~~~~~~
+
+.. attributetable:: ForumTag
+
+.. autoclass:: ForumTag
+    :members:
+
 
 Exceptions
 ------------
