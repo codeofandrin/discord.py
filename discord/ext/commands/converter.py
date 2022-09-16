@@ -1109,9 +1109,15 @@ else:
             # Trick to allow it inside typing.Union
             pass
 
+        def __or__(self, rhs) -> Any:
+            return Union[self, rhs]
+
+        def __repr__(self) -> str:
+            return f'{self.__class__.__name__}[{self.annotation.__name__}, {self.min}, {self.max}]'
+
         def __class_getitem__(cls, obj) -> Range:
             if not isinstance(obj, tuple):
-                raise TypeError(f'expected tuple for arguments, received {obj.__class__!r} instead')
+                raise TypeError(f'expected tuple for arguments, received {obj.__class__.__name__} instead')
 
             if len(obj) == 2:
                 obj = (*obj, None)
