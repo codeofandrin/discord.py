@@ -310,8 +310,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         .. versionchanged:: 1.3
             The ``overwrites`` keyword-only parameter was added.
@@ -402,8 +401,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         You cannot bulk delete more than 100 messages or messages that
         are older than 14 days old.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_messages` to do this.
 
         .. versionchanged:: 2.0
 
@@ -464,9 +462,9 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         ``check``. If a ``check`` is not provided then all messages are deleted
         without discrimination.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to
+        You must have :attr:`~Permissions.manage_messages` to
         delete messages even if they are your own.
-        The :attr:`~Permissions.read_message_history` permission is
+        Having :attr:`~Permissions.read_message_history` is
         also needed to retrieve message history.
 
         .. versionchanged:: 2.0
@@ -536,7 +534,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
 
         Gets the list of webhooks from this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         Raises
         -------
@@ -559,7 +557,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
 
         Creates a webhook for this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         .. versionchanged:: 1.1
             Added the ``reason`` keyword-only parameter.
@@ -792,7 +790,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         """Returns an :term:`asynchronous iterator` that iterates over all archived threads in this text channel,
         in order of decreasing ID for joined threads, and decreasing :attr:`Thread.archive_timestamp` otherwise.
 
-        You must have :attr:`~Permissions.read_message_history` to use this. If iterating over private threads
+        You must have :attr:`~Permissions.read_message_history` to do this. If iterating over private threads
         then :attr:`~Permissions.manage_threads` is also required.
 
         .. versionadded:: 2.0
@@ -1132,8 +1130,7 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
         You cannot bulk delete more than 100 messages or messages that
         are older than 14 days old.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_messages` to do this.
 
         .. versionadded:: 2.0
 
@@ -1190,9 +1187,9 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
         ``check``. If a ``check`` is not provided then all messages are deleted
         without discrimination.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to
+        You must have :attr:`~Permissions.manage_messages` to
         delete messages even if they are your own.
-        The :attr:`~Permissions.read_message_history` permission is
+        Having :attr:`~Permissions.read_message_history` is
         also needed to retrieve message history.
 
         .. versionadded:: 2.0
@@ -1261,7 +1258,7 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
 
         Gets the list of webhooks from this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         .. versionadded:: 2.0
 
@@ -1286,7 +1283,7 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
 
         Creates a webhook for this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         .. versionadded:: 2.0
 
@@ -1356,8 +1353,7 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         .. versionchanged:: 1.3
             The ``overwrites`` keyword-only parameter was added.
@@ -1565,8 +1561,7 @@ class StageChannel(VocalGuildChannel):
 
         Create a stage instance.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         .. versionadded:: 2.0
 
@@ -1656,8 +1651,7 @@ class StageChannel(VocalGuildChannel):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         .. versionchanged:: 2.0
             The ``topic`` parameter must now be set via :attr:`create_instance`.
@@ -1827,8 +1821,7 @@ class CategoryChannel(discord.abc.GuildChannel, Hashable):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         .. versionchanged:: 1.3
             The ``overwrites`` keyword-only parameter was added.
@@ -2013,7 +2006,7 @@ class ForumTag(Hashable):
 
     __slots__ = ('name', 'id', 'moderated', 'emoji')
 
-    def __init__(self, *, name: str, emoji: Optional[EmojiInputType], moderated: bool = False) -> None:
+    def __init__(self, *, name: str, emoji: Optional[EmojiInputType] = None, moderated: bool = False) -> None:
         self.name: str = name
         self.id: int = 0
         self.moderated: bool = moderated
@@ -2022,8 +2015,8 @@ class ForumTag(Hashable):
             self.emoji = emoji._to_partial()
         elif isinstance(emoji, str):
             self.emoji = PartialEmoji.from_str(emoji)
-        else:
-            raise TypeError(f'emoji must be a Emoji, PartialEmoji, or str not {emoji.__class__.__name__}')
+        elif emoji is not None:
+            raise TypeError(f'emoji must be a Emoji, PartialEmoji, str or None not {emoji.__class__.__name__}')
 
     @classmethod
     def from_data(cls, *, state: ConnectionState, data: ForumTagPayload) -> Self:
@@ -2293,8 +2286,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
 
         Edits the forum.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         Parameters
         ----------
@@ -2407,8 +2399,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
 
         Creates a new tag in this forum.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         Parameters
         ----------
@@ -2596,7 +2587,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
 
         Gets the list of webhooks from this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         Raises
         -------
@@ -2619,7 +2610,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
 
         Creates a webhook for this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         Parameters
         -------------
@@ -2651,6 +2642,73 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
 
         data = await self._state.http.create_webhook(self.id, name=str(name), avatar=avatar, reason=reason)
         return Webhook.from_state(data, state=self._state)
+
+    async def archived_threads(
+        self,
+        *,
+        limit: Optional[int] = 100,
+        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+    ) -> AsyncIterator[Thread]:
+        """Returns an :term:`asynchronous iterator` that iterates over all archived threads in this forum
+        in order of decreasing :attr:`Thread.archive_timestamp`.
+
+        You must have :attr:`~Permissions.read_message_history` to do this.
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        limit: Optional[:class:`bool`]
+            The number of threads to retrieve.
+            If ``None``, retrieves every archived thread in the channel. Note, however,
+            that this would make it a slow operation.
+        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Retrieve archived channels before the given date or ID.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to get archived threads.
+        HTTPException
+            The request to get the archived threads failed.
+
+        Yields
+        -------
+        :class:`Thread`
+            The archived threads.
+        """
+        before_timestamp = None
+
+        if isinstance(before, datetime.datetime):
+            before_timestamp = before.isoformat()
+        elif before is not None:
+            before_timestamp = utils.snowflake_time(before.id).isoformat()
+
+        update_before = lambda data: data['thread_metadata']['archive_timestamp']
+
+        while True:
+            retrieve = 100
+            if limit is not None:
+                if limit <= 0:
+                    return
+                retrieve = max(2, min(retrieve, limit))
+
+            data = await self.guild._state.http.get_public_archived_threads(self.id, before=before_timestamp, limit=retrieve)
+
+            threads = data.get('threads', [])
+            for raw_thread in threads:
+                yield Thread(guild=self.guild, state=self.guild._state, data=raw_thread)
+                # Currently the API doesn't let you request less than 2 threads.
+                # Bail out early if we had to retrieve more than what the limit was.
+                if limit is not None:
+                    limit -= 1
+                    if limit <= 0:
+                        return
+
+            if not data.get('has_more', False):
+                return
+
+            before_timestamp = update_before(threads[-1])
 
 
 class DMChannel(discord.abc.Messageable, discord.abc.PrivateChannel, Hashable):
