@@ -155,7 +155,7 @@ class IDConverter(Converter[T_co]):
 class ObjectConverter(IDConverter[discord.Object]):
     """Converts to a :class:`~discord.Object`.
 
-    The argument must follow the valid ID or mention formats (e.g. `<@80088516616269824>`).
+    The argument must follow the valid ID or mention formats (e.g. ``<@80088516616269824>``).
 
     .. versionadded:: 2.0
 
@@ -1067,6 +1067,8 @@ else:
         - ``Range[int, 10]`` means the minimum is 10 with no maximum.
         - ``Range[int, None, 10]`` means the maximum is 10 with no minimum.
         - ``Range[int, 1, 10]`` means the minimum is 1 and the maximum is 10.
+        - ``Range[float, 1.0, 5.0]`` means the minimum is 1.0 and the maximum is 5.0.
+        - ``Range[str, 1, 10]`` means the minimum length is 1 and the maximum length is 10.
 
         Inside a :class:`HybridCommand` this functions equivalently to :class:`discord.app_commands.Range`.
 

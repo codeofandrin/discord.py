@@ -41,6 +41,7 @@ from typing import (
     Dict,
     TYPE_CHECKING,
     Optional,
+    Sequence,
     TypeVar,
     Type,
     Union,
@@ -703,7 +704,7 @@ class BotBase(GroupMixin[None]):
         *,
         override: bool = False,
         guild: Optional[Snowflake] = MISSING,
-        guilds: List[Snowflake] = MISSING,
+        guilds: Sequence[Snowflake] = MISSING,
     ) -> None:
         """|coro|
 
@@ -811,7 +812,7 @@ class BotBase(GroupMixin[None]):
         /,
         *,
         guild: Optional[Snowflake] = MISSING,
-        guilds: List[Snowflake] = MISSING,
+        guilds: Sequence[Snowflake] = MISSING,
     ) -> Optional[Cog]:
         """|coro|
 
@@ -1059,7 +1060,9 @@ class BotBase(GroupMixin[None]):
         await self._call_module_finalizers(lib, name)
 
     async def reload_extension(self, name: str, *, package: Optional[str] = None) -> None:
-        """Atomically reloads an extension.
+        """|coro|
+
+        Atomically reloads an extension.
 
         This replaces the extension with the same extension, only refreshed. This is
         equivalent to a :meth:`unload_extension` followed by a :meth:`load_extension`

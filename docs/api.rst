@@ -233,6 +233,7 @@ AutoMod
 .. function:: on_automod_rule_create(rule)
 
     Called when a :class:`AutoModRule` is created.
+    You must have :attr:`~Permissions.manage_guild` to receive this.
 
     This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
 
@@ -244,6 +245,7 @@ AutoMod
 .. function:: on_automod_rule_update(rule)
 
     Called when a :class:`AutoModRule` is updated.
+    You must have :attr:`~Permissions.manage_guild` to receive this.
 
     This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
 
@@ -255,6 +257,7 @@ AutoMod
 .. function:: on_automod_rule_delete(rule)
 
     Called when a :class:`AutoModRule` is deleted.
+    You must have :attr:`~Permissions.manage_guild` to receive this.
 
     This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
 
@@ -266,6 +269,7 @@ AutoMod
 .. function:: on_automod_action(execution)
 
     Called when a :class:`AutoModAction` is created/performed.
+    You must have :attr:`~Permissions.manage_guild` to receive this.
 
     This requires :attr:`Intents.auto_moderation_execution` to be enabled.
 
@@ -615,6 +619,28 @@ Guilds
     :param after: A list of stickers after the update.
     :type after: Sequence[:class:`GuildSticker`]
 
+.. function:: on_audit_log_entry_create(entry)
+
+    Called when a :class:`Guild` gets a new audit log entry.
+    You must have :attr:`~Permissions.view_audit_log` to receive this.
+
+    This requires :attr:`Intents.moderation` to be enabled.
+
+    .. versionadded:: 2.2
+
+    .. warning::
+
+        Audit log entries received through the gateway are subject to data retrieval
+        from cache rather than REST. This means that some data might not be present
+        when you expect it to be. For example, the :attr:`AuditLogEntry.target`
+        attribute will usually be a :class:`discord.Object` and the
+        :attr:`AuditLogEntry.user` attribute will depend on user and member cache.
+
+        To get the user ID of entry, :attr:`AuditLogEntry.user_id` can be used instead.
+
+    :param entry: The audit log entry that was created.
+    :type entry: :class:`AuditLogEntry`
+
 .. function:: on_invite_create(invite)
 
     Called when an :class:`Invite` is created.
@@ -778,6 +804,7 @@ Members
     - pending
     - timeout
     - guild avatar
+    - flags
 
     Due to a Discord limitation, this event is not dispatched when a member's timeout expires.
 
@@ -809,7 +836,7 @@ Members
 
     Called when user gets banned from a :class:`Guild`.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.moderation` to be enabled.
 
     :param guild: The guild the user got banned from.
     :type guild: :class:`Guild`
@@ -822,7 +849,7 @@ Members
 
     Called when a :class:`User` gets unbanned from a :class:`Guild`.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.moderation` to be enabled.
 
     :param guild: The guild the user got unbanned from.
     :type guild: :class:`Guild`
@@ -1372,6 +1399,8 @@ Utility Functions
 
 .. autofunction:: discord.utils.setup_logging
 
+.. autofunction:: discord.utils.maybe_coroutine
+
 .. autofunction:: discord.utils.snowflake_time
 
 .. autofunction:: discord.utils.time_snowflake
@@ -1614,6 +1643,22 @@ of :class:`enum.Enum`.
         sent if the rule is configured to sent an alert when triggered.
 
         .. versionadded:: 2.0
+    .. attribute:: role_subscription_purchase
+
+        The system message sent when a user purchases or renews a role subscription.
+
+        .. versionadded:: 2.2
+    .. attribute:: interaction_premium_upsell
+
+        The system message sent when a user is given an advertisement to purchase a premium tier for
+        an application during an interaction.
+
+        .. versionadded:: 2.2
+    .. attribute:: guild_application_premium_subscription
+
+        The system message sent when an application's premium subscription is purchased for the guild.
+
+        .. versionadded:: 2.2
 
 .. class:: UserFlags
 
@@ -1669,7 +1714,7 @@ of :class:`enum.Enum`.
         The user is an Early Verified Bot Developer.
     .. attribute:: discord_certified_moderator
 
-        The user is a Discord Certified Moderator.
+        The user is a Moderator Programs Alumni.
     .. attribute:: bot_http_interactions
 
         The user is a bot that only uses HTTP interactions and is shown in the online member list.
@@ -1680,6 +1725,12 @@ of :class:`enum.Enum`.
         The user is flagged as a spammer by Discord.
 
         .. versionadded:: 2.0
+
+    .. attribute:: active_developer
+
+        The user is an active developer.
+
+        .. versionadded:: 2.1
 
 .. class:: ActivityType
 
@@ -1851,7 +1902,7 @@ of :class:`enum.Enum`.
         An alias for :attr:`dnd`.
     .. attribute:: invisible
 
-        The member is "invisible". In reality, this is only used in sending
+        The member is "invisible". In reality, this is only used when sending
         a presence a la :meth:`Client.change_presence`. When you receive a
         user's presence this will be :attr:`offline` instead.
 
@@ -2013,7 +2064,7 @@ of :class:`enum.Enum`.
         A member was kicked.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got kicked.
+        the :class:`User` or :class:`Object` who got kicked.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2037,7 +2088,7 @@ of :class:`enum.Enum`.
         A member was banned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got banned.
+        the :class:`User` or :class:`Object` who got banned.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2046,7 +2097,7 @@ of :class:`enum.Enum`.
         A member was unbanned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got unbanned.
+        the :class:`User` or :class:`Object` who got unbanned.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2058,7 +2109,7 @@ of :class:`enum.Enum`.
         - They were server muted or deafened (or it was undo'd)
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got updated.
+        the :class:`Member`, :class:`User`, or :class:`Object` who got updated.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2073,7 +2124,7 @@ of :class:`enum.Enum`.
         either gains a role or loses a role.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got the role.
+        the :class:`Member`, :class:`User`, or :class:`Object` who got the role.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2109,7 +2160,7 @@ of :class:`enum.Enum`.
         A bot was added to the guild.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` which was added to the guild.
+        the :class:`Member`, :class:`User`, or :class:`Object` which was added to the guild.
 
         .. versionadded:: 1.3
 
@@ -2290,7 +2341,7 @@ of :class:`enum.Enum`.
         only triggers if the message was deleted by someone other than the author.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who had their message deleted.
+        the :class:`Member`, :class:`User`, or :class:`Object` who had their message deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -2317,7 +2368,7 @@ of :class:`enum.Enum`.
         A message was pinned in a channel.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who had their message pinned.
+        the :class:`Member`, :class:`User`, or :class:`Object` who had their message pinned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -2332,7 +2383,7 @@ of :class:`enum.Enum`.
         A message was unpinned in a channel.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who had their message unpinned.
+        the :class:`Member`, :class:`User`, or :class:`Object` who had their message unpinned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -2844,6 +2895,12 @@ of :class:`enum.Enum`.
 
         Represents a sticker with a lottie image.
 
+    .. attribute:: gif
+
+        Represents a sticker with a gif image.
+
+        .. versionadded:: 2.2
+
 .. class:: InviteTarget
 
     Represents the invite type for voice channel invites.
@@ -2962,6 +3019,12 @@ of :class:`enum.Enum`.
     .. attribute:: czech
 
         The ``cs`` locale.
+
+    .. attribute:: indonesian
+
+        The ``id`` locale.
+
+        .. versionadded:: 2.2
 
     .. attribute:: danish
 
@@ -3193,6 +3256,26 @@ of :class:`enum.Enum`.
     .. attribute:: timeout
 
         The rule will timeout a user.
+
+
+.. class:: ForumLayoutType
+
+    Represents how a forum's posts are layed out in the client.
+
+    .. versionadded:: 2.2
+
+    .. attribute:: not_set
+
+        No default has been set, so it is up to the client to know how to lay it out.
+
+    .. attribute:: list_view
+
+        Displays posts as a list.
+
+    .. attribute:: gallery_view
+
+        Displays posts as a collection of tiles.
+
 
 .. _discord-api-audit-logs:
 
@@ -3434,9 +3517,9 @@ AuditLogDiff
 
     .. attribute:: type
 
-        The type of channel or sticker.
+        The type of channel, sticker or integration.
 
-        :type: Union[:class:`ChannelType`, :class:`StickerType`]
+        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`str`]
 
     .. attribute:: topic
 
@@ -4590,6 +4673,14 @@ MessageApplication
 .. autoclass:: MessageApplication
     :members:
 
+RoleSubscriptionInfo
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RoleSubscriptionInfo
+
+.. autoclass:: RoleSubscriptionInfo
+    :members:
+
 Intents
 ~~~~~~~~~~
 
@@ -4742,6 +4833,13 @@ PublicUserFlags
 .. autoclass:: PublicUserFlags
     :members:
 
+MemberFlags
+~~~~~~~~~~~~
+
+.. attributetable:: MemberFlags
+
+.. autoclass:: MemberFlags
+    :members:
 
 ForumTag
 ~~~~~~~~~

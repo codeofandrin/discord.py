@@ -451,11 +451,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.require_var_positional: bool = kwargs.get('require_var_positional', False)
         self.ignore_extra: bool = kwargs.get('ignore_extra', True)
         self.cooldown_after_parsing: bool = kwargs.get('cooldown_after_parsing', False)
-        self._cog: CogT = None
+        self._cog: CogT = None  # type: ignore # This breaks every other pyright release
 
         # bandaid for the fact that sometimes parent can be the bot instance
         parent: Optional[GroupMixin[Any]] = kwargs.get('parent')
-        self.parent: Optional[GroupMixin[Any]] = parent if isinstance(parent, _BaseCommand) else None
+        self.parent: Optional[GroupMixin[Any]] = parent if isinstance(parent, _BaseCommand) else None  # type: ignore # Does not recognise mixin usage
 
         self._before_invoke: Optional[Hook] = None
         try:
@@ -2049,7 +2049,7 @@ def has_role(item: Union[int, str], /) -> Check[Any]:
 def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
     r"""A :func:`.check` that is added that checks if the member invoking the
     command has **any** of the roles specified. This means that if they have
-    one out of the three roles specified, then this check will return `True`.
+    one out of the three roles specified, then this check will return ``True``.
 
     Similar to :func:`.has_role`\, the names or IDs passed in must be exact.
 
@@ -2453,6 +2453,10 @@ def cooldown(
 
         .. versionchanged:: 1.7
             Callables are now supported for custom bucket types.
+
+        .. versionchanged:: 2.0
+            When passing a callable, it now needs to accept :class:`.Context`
+            rather than :class:`~discord.Message` as its only argument.
     """
 
     def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:

@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import array
 import asyncio
+from textwrap import TextWrapper
 from typing import (
     Any,
     AsyncIterable,
@@ -46,6 +47,7 @@ from typing import (
     Protocol,
     Set,
     Sequence,
+    SupportsIndex,
     Tuple,
     Type,
     TypeVar,
@@ -90,6 +92,7 @@ __all__ = (
     'remove_markdown',
     'escape_markdown',
     'escape_mentions',
+    'maybe_coroutine',
     'as_chunks',
     'format_dt',
     'MISSING',
@@ -224,7 +227,18 @@ class SequenceProxy(Sequence[T_co]):
             self.__proxied = list(self.__proxied)
         return self.__proxied
 
-    def __getitem__(self, idx: int) -> T_co:
+    def __repr__(self) -> str:
+        return f"SequenceProxy({self.__proxied!r})"
+
+    @overload
+    def __getitem__(self, idx: SupportsIndex) -> T_co:
+        ...
+
+    @overload
+    def __getitem__(self, idx: slice) -> List[T_co]:
+        ...
+
+    def __getitem__(self, idx: Union[SupportsIndex, slice]) -> Union[T_co, List[T_co]]:
         return self.__copied[idx]
 
     def __len__(self) -> int:
@@ -645,6 +659,30 @@ def _parse_ratelimit_header(request: Any, *, use_clock: bool = False) -> float:
 
 
 async def maybe_coroutine(f: MaybeAwaitableFunc[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
+    r"""|coro|
+
+    A helper function that will await the result of a function if it's a coroutine
+    or return the result if it's not.
+
+    This is useful for functions that may or may not be coroutines.
+
+    .. versionadded:: 2.2
+
+    Parameters
+    -----------
+    f: Callable[..., Any]
+        The function or coroutine to call.
+    \*args
+        The arguments to pass to the function.
+    \*\*kwargs
+        The keyword arguments to pass to the function.
+
+    Returns
+    --------
+    Any
+        The result of the function or coroutine.
+    """
+
     value = f(*args, **kwargs)
     if _isawaitable(value):
         return await value
@@ -1195,15 +1233,24 @@ def format_dt(dt: datetime.datetime, /, style: Optional[TimestampStyle] = None) 
     return f'<t:{int(dt.timestamp())}:{style}>'
 
 
+def is_docker() -> bool:
+    path = '/proc/self/cgroup'
+    return os.path.exists('/.dockerenv') or (os.path.isfile(path) and any('docker' in line for line in open(path)))
+
+
 def stream_supports_colour(stream: Any) -> bool:
+    # Pycharm and Vscode support colour in their inbuilt editors
+    if 'PYCHARM_HOSTED' in os.environ or os.environ.get('TERM_PROGRAM') == 'vscode':
+        return True
+
     is_a_tty = hasattr(stream, 'isatty') and stream.isatty()
     if sys.platform != 'win32':
-        return is_a_tty
+        # Docker does not consistently have a tty attached to it
+        return is_a_tty or is_docker()
 
     # ANSICON checks for things like ConEmu
     # WT_SESSION checks if this is Windows Terminal
-    # VSCode built-in terminal supports colour too
-    return is_a_tty and ('ANSICON' in os.environ or 'WT_SESSION' in os.environ or os.environ.get('TERM_PROGRAM') == 'vscode')
+    return is_a_tty and ('ANSICON' in os.environ or 'WT_SESSION' in os.environ)
 
 
 class _ColourFormatter(logging.Formatter):
@@ -1307,3 +1354,23 @@ def setup_logging(
     handler.setFormatter(formatter)
     logger.setLevel(level)
     logger.addHandler(handler)
+
+
+def _shorten(
+    input: str,
+    *,
+    _wrapper: TextWrapper = TextWrapper(width=100, max_lines=1, replace_whitespace=True, placeholder='…'),
+) -> str:
+    try:
+        # split on the first double newline since arguments may appear after that
+        input, _ = re.split(r'\n\s*\n', input, maxsplit=1)
+    except ValueError:
+        pass
+    return _wrapper.fill(' '.join(input.strip().split()))
+
+
+CAMEL_CASE_REGEX = re.compile(r'(?<!^)(?=[A-Z])')
+
+
+def _to_kebab_case(text: str) -> str:
+    return CAMEL_CASE_REGEX.sub('-', text).lower()

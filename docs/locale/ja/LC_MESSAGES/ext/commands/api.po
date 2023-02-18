@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: discordpy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-06 06:27+0000\n"
-"PO-Revision-Date: 2022-09-07 14:31\n"
+"POT-Creation-Date: 2023-01-29 20:45+0000\n"
+"PO-Revision-Date: 2023-01-30 13:38\n"
 "Last-Translator: \n"
 "Language-Team: Japanese\n"
 "MIME-Version: 1.0\n"
@@ -383,7 +383,7 @@ msgstr "Callable[..., :class:`HybridGroup`]"
 
 #: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.listen:1
 msgid "A decorator that registers another function as an external event listener. Basically this allows you to listen to multiple events from different places e.g. such as :func:`.on_ready`"
-msgstr "関数を追加のイベントリスナーに登録するデコレータ。 基本的には異なる場所から複数のイベントを登録することに使われます（  :func:`.on_ready` など）。"
+msgstr "関数を追加のイベントリスナーとして登録するデコレータ。 基本的には異なる場所から複数のイベントを登録することに使われます（ :func:`.on_ready` など）。"
 
 #: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.listen:5
 msgid "The functions being listened to must be a :ref:`coroutine <coroutine>`."
@@ -815,8 +815,8 @@ msgid "Revokes an :class:`.Invite`, URL, or ID to an invite."
 msgstr ":class:`.Invite` や、招待のURL、IDを削除します。"
 
 #: ../../../discord/ext/commands/bot.py:docstring of discord.client.Client.delete_invite:5
-msgid "You must have the :attr:`~.Permissions.manage_channels` permission in the associated guild to do this."
-msgstr "これを行うには、関連付けられたGuildにて、 :attr:`~.Permissions.manage_channels` 権限が必要です。"
+msgid "You must have :attr:`~.Permissions.manage_channels` in the associated guild to do this."
+msgstr "これを行うには、関連付けられたGuildにて、 :attr:`~.Permissions.manage_channels` が必要です。"
 
 #: ../../../discord/ext/commands/bot.py:docstring of discord.client.Client.delete_invite:10
 msgid "``invite`` parameter is now positional-only."
@@ -868,7 +868,7 @@ msgstr "``channel_id`` 引数は位置限定引数になりました。"
 
 #: ../../../discord/ext/commands/bot.py:docstring of discord.client.Client.fetch_channel:15
 msgid "An unknown channel type was received from Discord."
-msgstr "まだ定義されていないチャネルタイプがDiscord APIから受信された場合。"
+msgstr "まだ定義されていないチャンネルタイプがDiscord APIから受信された場合。"
 
 #: ../../../discord/ext/commands/bot.py:docstring of discord.client.Client.fetch_channel:16
 msgid "Retrieving the channel failed."
@@ -1605,7 +1605,7 @@ msgid "The package name to resolve relative imports with. This is required when 
 msgstr "相対インポートを解決するためのパッケージ名。例えば ``.foo.test`` のように、相対パスで拡張機能を読み込む場合に必要になります。デフォルトは ``None`` です。"
 
 #: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.load_extension:27
-#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:20
+#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:22
 msgid "The extension could not be imported.     This is also raised if the name of the extension could not     be resolved using the provided ``package`` parameter."
 msgstr "エクステンションを読み込めなかった場合。この例外は渡された ``package`` パラメータを解釈できなかったときにも発生します。"
 
@@ -1614,7 +1614,7 @@ msgid "The extension is already loaded."
 msgstr "エクステンションがすでに読み込まれている場合。"
 
 #: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.load_extension:29
-#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:21
+#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:23
 msgid "The extension does not have a setup function."
 msgstr "エクステンションに ``setup`` 関数がない場合。"
 
@@ -1708,28 +1708,28 @@ msgstr "また、メッセージの作成者がボットであるか確認し、
 msgid "The message to process commands for."
 msgstr "コマンドを処理するメッセージ。"
 
-#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:1
+#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:3
 msgid "Atomically reloads an extension."
 msgstr "拡張機能を「極小単位で」リロードします。"
 
-#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:3
+#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:5
 msgid "This replaces the extension with the same extension, only refreshed. This is equivalent to a :meth:`unload_extension` followed by a :meth:`load_extension` except done in an atomic way. That is, if an operation fails mid-reload then the bot will roll-back to the prior working state."
 msgstr "これにより、拡張機能が、ほとんど同じ拡張機能で置き換えられ、更新されるだけです。 これは 、:meth:`unload_extension` が実行され、次に :meth:`load_extension` が実行される、この一連の流れと同等です。 つまり、操作がリロード中に失敗した場合、Botは以前の状態にロールバックします。"
 
-#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:8
+#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:10
 msgid "The extension name to reload. It must be dot separated like regular Python imports if accessing a sub-module. e.g. ``foo.test`` if you want to import ``foo/test.py``."
 msgstr "リロードする拡張モジュール名。サブモジュールにアクセスする場合は、通常の Pythonのimportのように、ドットで区切られている必要があります。 例: ``foo.test`` を ``foo/test.py`` をインポートする場合。"
 
-#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:12
+#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:14
 msgid "The package name to resolve relative imports with. This is required when reloading an extension using a relative path, e.g ``.foo.test``. Defaults to ``None``."
 msgstr "相対インポートを解決するためのパッケージ名。 ``.hoge.test`` のように、相対パスを使用してエクステンションを再読込する場合に必要です。デフォルトは ``None`` です。"
 
-#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:19
+#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:21
 #: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.unload_extension:29
 msgid "The extension was not loaded."
 msgstr "拡張機能がもともとロードされていなかった場合。"
 
-#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:22
+#: ../../../discord/ext/commands/bot.py:docstring of discord.ext.commands.bot.BotBase.reload_extension:24
 msgid "The extension setup function had an execution error."
 msgstr "エクステンションセットアップ関数に、何らかの実行エラーが発生した場合。"
 
@@ -2109,8 +2109,8 @@ msgstr "デフォルトは (:meth:`.Bot.on_command_error`) です。"
 #: ../../ext/commands/api.rst:84
 #: ../../ext/commands/api.rst:96
 #: ../../ext/commands/api.rst:106
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_before_invoke:7
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_after_invoke:7
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_before_invoke:9
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_after_invoke:9
 msgid "The invocation context."
 msgstr "呼び出しコンテキスト。"
 
@@ -2898,6 +2898,10 @@ msgstr "関数がコルーチンではないか、文字列が名前として渡
 msgid ":class:`bool`: Checks whether the cog has an error handler."
 msgstr ":class:`bool`: コグにエラーハンドラが登録されているかどうかをチェックします。"
 
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.has_app_command_error_handler:1
+msgid ":class:`bool`: Checks whether the cog has an app error handler."
+msgstr ":class:`bool`: コグにアプリケーションエラーハンドラが登録されているかどうかをチェックします。"
+
 #: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_load:1
 #: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_unload:1
 #: ../../../discord/ext/commands/help.py:docstring of discord.ext.commands.help.HelpCommand.command_not_found:1
@@ -2943,58 +2947,58 @@ msgstr ":meth:`.Bot.check` チェックとして登録する特別なメソッ�
 msgid "A special method that registers as a :func:`~discord.ext.commands.check` for every command and subcommand in this cog."
 msgstr "このコグのすべてのコマンドとサブコマンドに対して :func:`~discord.ext.commands.check` として登録する特別なメソッド。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_command_error:1
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_command_error:3
 msgid "A special method that is called whenever an error is dispatched inside this cog."
 msgstr "このコグ内でエラーが発生するたびに呼び出される特別なメソッド。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_command_error:4
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_command_error:6
 msgid "This is similar to :func:`.on_command_error` except only applying to the commands inside this cog."
 msgstr "これは :func:`.on_command_error` に似ていますが、コグ内のコマンドにのみ適用されます。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_command_error:7
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_app_command_error:7
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_before_invoke:5
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_after_invoke:5
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_command_error:9
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_app_command_error:9
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_before_invoke:7
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_after_invoke:7
 msgid "This **must** be a coroutine."
 msgstr "**コルーチンでなければなりません**。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_command_error:9
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_command_error:11
 msgid "The invocation context where the error happened."
 msgstr "エラーが発生した呼び出しコンテキスト。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_command_error:11
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_command_error:13
 msgid "The error that happened."
 msgstr "発生したエラー"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_app_command_error:1
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_app_command_error:3
 msgid "A special method that is called whenever an error within an application command is dispatched inside this cog."
 msgstr "このコグ内でアプリケーションコマンドのエラーが発生するたびに呼び出される特別なメソッド。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_app_command_error:4
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_app_command_error:6
 msgid "This is similar to :func:`discord.app_commands.CommandTree.on_error` except only applying to the application commands inside this cog."
 msgstr "これは :func:`discord.app_commands.CommandTree.on_error` に似ていますが、コグ内のアプリケーションコマンドにのみ適用されます。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_app_command_error:9
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_app_command_error:11
 msgid "The interaction that is being handled."
 msgstr "処理中のインタラクション。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_app_command_error:11
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_app_command_error:13
 msgid "The exception that was raised."
 msgstr "発生した例外。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_before_invoke:1
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_before_invoke:3
 msgid "A special method that acts as a cog local pre-invoke hook."
 msgstr "コグのローカル事前呼び出しフックとして機能する特別なメソッド。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_before_invoke:3
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_before_invoke:5
 msgid "This is similar to :meth:`.Command.before_invoke`."
 msgstr "これは :meth:`.Command.before_invoke` に似ています。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_after_invoke:1
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_after_invoke:3
 msgid "A special method that acts as a cog local post-invoke hook."
 msgstr "コグのローカルポスト呼び出しフックとして機能する特別なメソッド。"
 
-#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_after_invoke:3
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.Cog.cog_after_invoke:5
 msgid "This is similar to :meth:`.Command.after_invoke`."
 msgstr "これは :meth:`.Command.after_invoke` に似ています。"
 
@@ -3015,6 +3019,10 @@ msgid "Decorators such as :func:`~discord.app_commands.guild_only`, :func:`~disc
 msgstr ":func:`~discord.app_commands.guild_only` 、 :func:`~discord.app_commands.guilds` 、 :func:`~discord.app_commands.default_permissions` のようなデコレータはコグの上に使用されている場合、グループに適用されます。"
 
 #: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.GroupCog:11
+msgid "Hybrid commands will also be added to the Group, giving the ability categorize slash commands into groups, while keeping the prefix-style command as a root-level command."
+msgstr "グループにもハイブリッドコマンドが追加され、プレフィックス形式のコマンドをルートレベルのコマンドとして保持しながら、スラッシュコマンドをグループに分類できるようになります。"
+
+#: ../../../discord/ext/commands/cog.py:docstring of discord.ext.commands.cog.GroupCog:14
 msgid "For example:"
 msgstr "例："
 
@@ -3481,7 +3489,7 @@ msgstr "デフォルトの実装では何もしません。"
 
 #: ../../../discord/ext/commands/help.py:docstring of discord.ext.commands.help.HelpCommand.prepare_help_command:12
 msgid "This is called *inside* the help command callback body. So all the usual rules that happen inside apply here as well."
-msgstr "これは *内部* ヘルプコマンドコールバック本体と呼ばれていますので、内部で発生する通常のルールはすべてここでも適用されます。 "
+msgstr "これは *内部* ヘルプコマンドコールバック本体と呼ばれていますので、内部で発生する通常のルールはすべてここでも適用されます。"
 
 #: ../../../discord/ext/commands/help.py:docstring of discord.ext.commands.help.HelpCommand.prepare_help_command:17
 msgid "``ctx`` and ``command`` parameters are now positional-only."
@@ -3662,8 +3670,8 @@ msgstr "デフォルトの実装では、引数の :attr:`~.commands.Parameter.n
 msgid "The command to list the arguments for."
 msgstr "引数の一覧を表示するコマンド。"
 
-#: ../../../discord/ext/commands/help.py:docstring of discord.ext.commands.help.DefaultHelpCommand.send_pages:1
-#: ../../../discord/ext/commands/help.py:docstring of discord.ext.commands.help.MinimalHelpCommand.send_pages:1
+#: ../../../discord/ext/commands/help.py:docstring of discord.ext.commands.help.DefaultHelpCommand.send_pages:3
+#: ../../../discord/ext/commands/help.py:docstring of discord.ext.commands.help.MinimalHelpCommand.send_pages:3
 msgid "A helper utility to send the page output from :attr:`paginator` to the destination."
 msgstr ":attr:`paginator` から出力されたページを宛先に送信するためのヘルパーユーティリティ。"
 
@@ -4012,8 +4020,8 @@ msgid "If this check is called in a DM context, it will raise an exception, :exc
 msgstr "このチェックがDMのコンテキストで呼び出されると、 :exc:`.NoPrivateMessage` 例外が発生します。"
 
 #: ../../../discord/ext/commands/core.py:docstring of discord.ext.commands.core.has_any_role:1
-msgid "A :func:`.check` that is added that checks if the member invoking the command has **any** of the roles specified. This means that if they have one out of the three roles specified, then this check will return `True`."
-msgstr "コマンドを呼び出したメンバーが、指定された名前またはIDのロールのうちの **どれか** を持っているかをチェックを追加する :func:`.check` 。 これは、指定された3つのうちのどのロールが指定されていても、このチェックが `True` を返すことを意味します。"
+msgid "A :func:`.check` that is added that checks if the member invoking the command has **any** of the roles specified. This means that if they have one out of the three roles specified, then this check will return ``True``."
+msgstr "コマンドを呼び出したメンバーが、指定された名前またはIDのロールのうちの **どれか** を持っているかをチェックを追加する :func:`.check` 。 これは、指定された3つのうちのどのロールが指定されていても、このチェックが ``True`` を返すことを意味します。"
 
 #: ../../../discord/ext/commands/core.py:docstring of discord.ext.commands.core.has_any_role:5
 msgid "Similar to :func:`.has_role`\\, the names or IDs passed in must be exact."
@@ -4101,6 +4109,10 @@ msgstr "持っているクールダウンの種類。呼び出し可能な場合
 #: ../../../discord/ext/commands/core.py:docstring of discord.ext.commands.core.cooldown:20
 msgid "Callables are now supported for custom bucket types."
 msgstr "カスタムされたBucketタイプの呼び出しをサポートするようになりました。"
+
+#: ../../../discord/ext/commands/core.py:docstring of discord.ext.commands.core.cooldown:23
+msgid "When passing a callable, it now needs to accept :class:`.Context` rather than :class:`~discord.Message` as its only argument."
+msgstr "呼び出し可能オブジェクトを渡す場合、 :class:`~discord.Message` ではなく、 :class:`.Context` を引数として受け付けないといけないようになりました。"
 
 #: ../../../discord/ext/commands/core.py:docstring of discord.ext.commands.core.dynamic_cooldown:1
 msgid "A decorator that adds a dynamic cooldown to a :class:`.Command`"
@@ -4579,8 +4591,8 @@ msgid "Returns an :term:`asynchronous iterator` that enables receiving the desti
 msgstr "出力先のメッセージ履歴を取得する :term:`asynchronous iterator` を返します。"
 
 #: ../../../discord/ext/commands/context.py:docstring of discord.abc.Messageable.history:3
-msgid "You must have :attr:`~discord.Permissions.read_message_history` permissions to use this."
-msgstr "これを行うためには、 :attr:`~discord.Permissions.read_message_history` 権限が必要です。"
+msgid "You must have :attr:`~discord.Permissions.read_message_history` to do this."
+msgstr "これを行うためには、 :attr:`~discord.Permissions.read_message_history` が必要です。"
 
 #: ../../../discord/ext/commands/context.py:docstring of discord.abc.Messageable.history:14
 msgid "Flattening into a list: ::"
@@ -4691,8 +4703,8 @@ msgid "The nonce to use for sending this message. If the message was successfull
 msgstr "メッセージの送信時に使用するナンス値。メッセージが正常に送信された場合、このメッセージにはこの値のナンス値が含まれます。"
 
 #: ../../../discord/ext/commands/context.py:docstring of discord.ext.commands.context.Context.send:30
-msgid "If provided, the number of seconds to wait in the background before deleting the message we just sent. If the deletion fails, then it is silently ignored. This is ignored for interaction based contexts."
-msgstr "指定したなら、これはメッセージを送信したあと待機し、すぐ削除する秒数となります。もし削除が失敗しても、それは静かに無視されます。インタラクションベースのコンテキストでは無視されます。"
+msgid "If provided, the number of seconds to wait in the background before deleting the message we just sent. If the deletion fails, then it is silently ignored."
+msgstr "指定すると、これはメッセージを送信したあと削除するまでにバックグラウンドで待機する秒数となります。もし削除が失敗しても、それは静かに無視されます。"
 
 #: ../../../discord/ext/commands/context.py:docstring of discord.ext.commands.context.Context.send:34
 msgid "Controls the mentions being processed in this message. If this is passed, then the object is merged with :attr:`~discord.Client.allowed_mentions`. The merging behaviour only overrides attributes that have been explicitly passed to the object, otherwise it uses the attributes set in :attr:`~discord.Client.allowed_mentions`. If no object is passed at all then the defaults given by :attr:`~discord.Client.allowed_mentions` are used instead."
@@ -4807,8 +4819,8 @@ msgid "Converts to a :class:`~discord.Object`."
 msgstr ":class:`~discord.Object` に変換します。"
 
 #: ../../../discord/ext/commands/converter.py:docstring of discord.ext.commands.converter.ObjectConverter:3
-msgid "The argument must follow the valid ID or mention formats (e.g. `<@80088516616269824>`)."
-msgstr "引数は有効なIDかメンション(例: `<@80088516616269824>`)でないといけません。"
+msgid "The argument must follow the valid ID or mention formats (e.g. ``<@80088516616269824>``)."
+msgstr "引数は有効なIDかメンション(例: ``<@80088516616269824>``)でないといけません。"
 
 #: ../../../discord/ext/commands/converter.py:docstring of discord.ext.commands.converter.ObjectConverter:7
 #: ../../../discord/ext/commands/converter.py:docstring of discord.ext.commands.converter.MemberConverter:6

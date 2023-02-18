@@ -42,6 +42,7 @@ __all__ = (
     'ApplicationFlags',
     'ChannelFlags',
     'AutoModPresets',
+    'MemberFlags',
 )
 
 BF = TypeVar('BF', bound='BaseFlags')
@@ -290,6 +291,24 @@ class SystemChannelFlags(BaseFlags):
         """
         return 8
 
+    @flag_value
+    def role_subscription_purchase_notifications(self):
+        """:class:`bool`: Returns ``True`` if role subscription purchase and renewal
+        notifications are enabled.
+
+        .. versionadded:: 2.2
+        """
+        return 16
+
+    @flag_value
+    def role_subscription_purchase_notification_replies(self):
+        """:class:`bool`: Returns ``True`` if the role subscription notifications
+        have a sticker reply button.
+
+        .. versionadded:: 2.2
+        """
+        return 32
+
 
 @fill_with_flags()
 class MessageFlags(BaseFlags):
@@ -414,6 +433,22 @@ class MessageFlags(BaseFlags):
         .. versionadded:: 2.0
         """
         return 256
+
+    @flag_value
+    def suppress_notifications(self):
+        """:class:`bool`: Returns ``True`` if the message will not trigger push and desktop notifications.
+
+        .. versionadded:: 2.2
+        """
+        return 4096
+
+    @alias_flag_value
+    def silent(self):
+        """:class:`bool`: Alias for :attr:`suppress_notifications`.
+
+        .. versionadded:: 2.2
+        """
+        return 4096
 
 
 @fill_with_flags()
@@ -574,6 +609,14 @@ class PublicUserFlags(BaseFlags):
         .. versionadded:: 2.0
         """
         return UserFlags.spammer.value
+
+    @flag_value
+    def active_developer(self):
+        """:class:`bool`: Returns ``True`` if the user is an active developer.
+
+        .. versionadded:: 2.1
+        """
+        return UserFlags.active_developer.value
 
     def all(self) -> List[UserFlags]:
         """List[:class:`UserFlags`]: Returns all public flags the user has."""
@@ -751,15 +794,25 @@ class Intents(BaseFlags):
         return 1 << 1
 
     @flag_value
-    def bans(self):
-        """:class:`bool`: Whether guild ban related events are enabled.
+    def moderation(self):
+        """:class:`bool`: Whether guild moderation related events are enabled.
 
         This corresponds to the following events:
 
         - :func:`on_member_ban`
         - :func:`on_member_unban`
+        - :func:`on_audit_log_entry_create`
 
         This does not correspond to any attributes or classes in the library in terms of cache.
+        """
+        return 1 << 2
+
+    @alias_flag_value
+    def bans(self):
+        """:class:`bool`: An alias of :attr:`moderation`.
+
+        .. versionchanged:: 2.2
+            Changed to an alias.
         """
         return 1 << 2
 
@@ -1426,6 +1479,15 @@ class ApplicationFlags(BaseFlags):
         command. This shows up as a badge in the official client."""
         return 1 << 23
 
+    @flag_value
+    def active(self):
+        """:class:`bool`: Returns ``True`` if the application has had at least one global application
+        command used in the last 30 days.
+
+        .. versionadded:: 2.1
+        """
+        return 1 << 24
+
 
 @fill_with_flags()
 class ChannelFlags(BaseFlags):
@@ -1601,3 +1663,77 @@ class AutoModPresets(ArrayFlags):
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
+
+
+@fill_with_flags()
+class MemberFlags(BaseFlags):
+    r"""Wraps up the Discord Guild Member flags
+
+    .. versionadded:: 2.2
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two MemberFlags are equal.
+
+        .. describe:: x != y
+
+            Checks if two MemberFlags are not equal.
+
+        .. describe:: x | y, x |= y
+
+            Returns a MemberFlags instance with all enabled flags from
+            both x and y.
+
+        .. describe:: x & y, x &= y
+
+            Returns a MemberFlags instance with only flags enabled on
+            both x and y.
+
+        .. describe:: x ^ y, x ^= y
+
+            Returns a MemberFlags instance with only flags enabled on
+            only one of x or y, not on both.
+
+        .. describe:: ~x
+
+            Returns a MemberFlags instance with all flags inverted from x.
+
+        .. describe:: hash(x)
+
+            Return the flag's hash.
+
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+
+    Attributes
+    -----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    @flag_value
+    def did_rejoin(self):
+        """:class:`bool`: Returns ``True`` if the member left and rejoined the :attr:`~discord.Member.guild`."""
+        return 1 << 0
+
+    @flag_value
+    def completed_onboarding(self):
+        """:class:`bool`: Returns ``True`` if the member has completed onboarding."""
+        return 1 << 1
+
+    @flag_value
+    def bypasses_verification(self):
+        """:class:`bool`: Returns ``True`` if the member can bypass the guild verification requirements."""
+        return 1 << 2
+
+    @flag_value
+    def started_onboarding(self):
+        """:class:`bool`: Returns ``True`` if the member has started onboarding."""
+        return 1 << 3

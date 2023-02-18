@@ -157,6 +157,8 @@ class View:
     __view_children_items__: ClassVar[List[ItemCallbackType[Any, Any]]] = []
 
     def __init_subclass__(cls) -> None:
+        super().__init_subclass__()
+
         children: Dict[str, ItemCallbackType[Any, Any]] = {}
         for base in reversed(cls.__mro__):
             for name, member in base.__dict__.items():
@@ -413,7 +415,7 @@ class View:
 
     async def _scheduled_task(self, item: Item, interaction: Interaction):
         try:
-            item._refresh_state(interaction.data)  # type: ignore
+            item._refresh_state(interaction, interaction.data)  # type: ignore
 
             allow = await self.interaction_check(interaction)
             if not allow:
@@ -508,7 +510,9 @@ class View:
         return self.timeout is None and all(item.is_persistent() for item in self._children)
 
     async def wait(self) -> bool:
-        """Waits until the view has finished interacting.
+        """|coro|
+
+        Waits until the view has finished interacting.
 
         A view is considered finished when :meth:`stop` is called
         or it times out.
@@ -636,6 +640,7 @@ class ViewStore:
     def remove_interaction_mapping(self, interaction_id: int) -> None:
         # This is called before re-adding the view
         self._views.pop(interaction_id, None)
+        self._synced_message_views.pop(interaction_id, None)
 
     def is_message_tracked(self, message_id: int) -> bool:
         return message_id in self._synced_message_views
