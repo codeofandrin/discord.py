@@ -2669,7 +2669,7 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.0
 
-    .. attribute:: automod_role_update
+    .. attribute:: automod_rule_update
 
         An automod rule was updated.
 
@@ -3517,9 +3517,9 @@ AuditLogDiff
 
     .. attribute:: type
 
-        The type of channel, sticker or integration.
+        The type of channel, sticker, webhook or integration.
 
-        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`str`]
+        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`WebhookType`, :class:`str`]
 
     .. attribute:: topic
 
