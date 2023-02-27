@@ -17,3 +17,4 @@ docs/crowdin.py
 /.coverage
 build/*
 .idea
+.idea/3
