@@ -1,1 +1,3 @@
 aiohttp>=3.7.4,<4
+Sphinx==5.1.1
+sphinxcontrib_trio==1.1.2
