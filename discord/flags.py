@@ -451,6 +451,14 @@ class MessageFlags(BaseFlags):
         """
         return 4096
 
+    @flag_value
+    def voice(self):
+        """:class:`bool`: Returns ``True`` if the message is a voice message.
+
+        .. versionadded:: 2.3
+        """
+        return 8192
+
 
 @fill_with_flags()
 class PublicUserFlags(BaseFlags):
@@ -1421,6 +1429,15 @@ class ApplicationFlags(BaseFlags):
         The raw value. You should query flags via the properties
         rather than using this raw value.
     """
+
+    @flag_value
+    def auto_mod_badge(self):
+        """:class:`bool`: Returns ``True`` if the application uses auto moderation.
+        This shows up as a badge in the official client.
+
+        .. versionadded:: 2.3
+        """
+        return 1 << 6
 
     @flag_value
     def gateway_presence(self):
