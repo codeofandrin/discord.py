@@ -119,6 +119,12 @@ class Permissions(BaseFlags):
                to be, for example, constructed as a dict or a list of pairs.
                Note that aliases are not shown.
 
+        .. describe:: bool(b)
+
+            Returns whether the permissions object has any permissions set to ``True``.
+
+            .. versionadded:: 2.0
+
     Attributes
     -----------
     value: :class:`int`
@@ -204,7 +210,7 @@ class Permissions(BaseFlags):
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
         permissions are currently:
 
-        - :attr:`manage_guild_expressions`
+        - :attr:`manage_expressions`
         - :attr:`view_audit_log`
         - :attr:`view_guild_insights`
         - :attr:`manage_guild`
@@ -213,6 +219,7 @@ class Permissions(BaseFlags):
         - :attr:`kick_members`
         - :attr:`ban_members`
         - :attr:`administrator`
+        - :attr:`create_expressions`
 
         .. versionchanged:: 1.7
            Added :attr:`stream`, :attr:`priority_speaker` and :attr:`use_application_commands` permissions.
@@ -223,9 +230,9 @@ class Permissions(BaseFlags):
            :attr:`request_to_speak` permissions.
 
         .. versionchanged:: 2.3
-           Added :attr:`use_soundboard`
+           Added :attr:`use_soundboard`, :attr:`create_expressions` permissions.
         """
-        return cls(0b1000111110110110011111101111111111101010001)
+        return cls(0b01000111110110110011111101111111111101010001)
 
     @classmethod
     def general(cls) -> Self:
@@ -237,8 +244,11 @@ class Permissions(BaseFlags):
            permissions :attr:`administrator`, :attr:`create_instant_invite`, :attr:`kick_members`,
            :attr:`ban_members`, :attr:`change_nickname` and :attr:`manage_nicknames` are
            no longer part of the general permissions.
+
+        .. versionchanged:: 2.3
+            Added :attr:`create_expressions` permission.
         """
-        return cls(0b01110000000010000000010010110000)
+        return cls(0b10000000000001110000000010000000010010110000)
 
     @classmethod
     def membership(cls) -> Self:
@@ -311,7 +321,7 @@ class Permissions(BaseFlags):
         - :attr:`manage_messages`
         - :attr:`manage_roles`
         - :attr:`manage_webhooks`
-        - :attr:`manage_guild_expressions`
+        - :attr:`manage_expressions`
         - :attr:`manage_threads`
         - :attr:`moderate_members`
 
@@ -550,21 +560,21 @@ class Permissions(BaseFlags):
         return 1 << 29
 
     @flag_value
-    def manage_guild_expressions(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can create, edit, or delete emojis, stickers, and soundboard sounds.
+    def manage_expressions(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can edit or delete emojis, stickers, and soundboard sounds.
 
         .. versionadded:: 2.3
         """
         return 1 << 30
 
-    @make_permission_alias('manage_guild_expressions')
+    @make_permission_alias('manage_expressions')
     def manage_emojis(self) -> int:
-        """:class:`bool`: An alias for :attr:`manage_guild_expressions`."""
+        """:class:`bool`: An alias for :attr:`manage_expressions`."""
         return 1 << 30
 
-    @make_permission_alias('manage_guild_expressions')
+    @make_permission_alias('manage_expressions')
     def manage_emojis_and_stickers(self) -> int:
-        """:class:`bool`: An alias for :attr:`manage_guild_expressions`.
+        """:class:`bool`: An alias for :attr:`manage_expressions`.
 
         .. versionadded:: 2.0
         """
@@ -665,6 +675,14 @@ class Permissions(BaseFlags):
         .. versionadded:: 2.3
         """
         return 1 << 42
+
+    @flag_value
+    def create_expressions(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can create emojis, stickers, and soundboard sounds.
+
+        .. versionadded:: 2.3
+        """
+        return 1 << 43
 
     @flag_value
     def use_external_sounds(self) -> int:
@@ -783,7 +801,7 @@ class PermissionOverwrite:
         manage_roles: Optional[bool]
         manage_permissions: Optional[bool]
         manage_webhooks: Optional[bool]
-        manage_guild_expressions: Optional[bool]
+        manage_expressions: Optional[bool]
         manage_emojis: Optional[bool]
         manage_emojis_and_stickers: Optional[bool]
         use_application_commands: Optional[bool]
@@ -800,6 +818,7 @@ class PermissionOverwrite:
         use_soundboard: Optional[bool]
         use_external_sounds: Optional[bool]
         send_voice_messages: Optional[bool]
+        create_expressions: Optional[bool]
 
     def __init__(self, **kwargs: Optional[bool]):
         self._values: Dict[str, Optional[bool]] = {}

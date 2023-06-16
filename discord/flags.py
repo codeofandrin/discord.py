@@ -239,6 +239,12 @@ class SystemChannelFlags(BaseFlags):
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
 
+        .. describe:: bool(b)
+
+            Returns whether any flag is set to ``True``.
+
+            .. versionadded:: 2.0
+
     Attributes
     -----------
     value: :class:`int`
@@ -360,6 +366,12 @@ class MessageFlags(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+        .. describe:: bool(b)
+
+            Returns whether any flag is set to ``True``.
+
+            .. versionadded:: 2.0
 
     .. versionadded:: 1.3
 
@@ -508,6 +520,12 @@ class PublicUserFlags(BaseFlags):
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
+
+        .. describe:: bool(b)
+
+            Returns whether any flag is set to ``True``.
+
+            .. versionadded:: 2.0
 
     .. versionadded:: 1.4
 
@@ -693,6 +711,12 @@ class Intents(BaseFlags):
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
 
+        .. describe:: bool(b)
+
+            Returns whether any intent is enabled.
+
+            .. versionadded:: 2.0
+
     Attributes
     -----------
     value: :class:`int`
@@ -792,6 +816,7 @@ class Intents(BaseFlags):
         - :attr:`User.name`
         - :attr:`User.avatar`
         - :attr:`User.discriminator`
+        - :attr:`User.global_name`
 
         For more information go to the :ref:`member intent documentation <need_members_intent>`.
 
@@ -1278,6 +1303,12 @@ class MemberCacheFlags(BaseFlags):
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
 
+        .. describe:: bool(b)
+
+            Returns whether any flag is set to ``True``.
+
+            .. versionadded:: 2.0
+
     Attributes
     -----------
     value: :class:`int`
@@ -1421,6 +1452,10 @@ class ApplicationFlags(BaseFlags):
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
 
+        .. describe:: bool(b)
+
+            Returns whether any flag is set to ``True``.
+
     .. versionadded:: 2.0
 
     Attributes
@@ -1556,6 +1591,10 @@ class ChannelFlags(BaseFlags):
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
 
+        .. describe:: bool(b)
+
+            Returns whether any flag is set to ``True``.
+
     .. versionadded:: 2.0
 
     Attributes
@@ -1652,6 +1691,10 @@ class AutoModPresets(ArrayFlags):
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
 
+        .. describe:: bool(b)
+
+            Returns whether any flag is set to ``True``.
+
     Attributes
     -----------
     value: :class:`int`
@@ -1735,6 +1778,10 @@ class MemberFlags(BaseFlags):
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
+
+        .. describe:: bool(b)
+
+            Returns whether any flag is set to ``True``.
 
 
     Attributes
