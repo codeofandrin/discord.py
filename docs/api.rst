@@ -1029,6 +1029,12 @@ Reactions
         Consider using :func:`on_raw_reaction_add` if you need this and do not otherwise want
         to enable the members intent.
 
+    .. warning::
+
+        This event does not have a way of differentiating whether a reaction is a
+        burst reaction (also known as "super reaction") or not. If you need this,
+        consider using :func:`on_raw_reaction_add` instead.
+
     :param reaction: The current state of the reaction.
     :type reaction: :class:`Reaction`
     :param user: The user who added the reaction.
@@ -1050,6 +1056,12 @@ Reactions
 
         Consider using :func:`on_raw_reaction_remove` if you need this and do not want
         to enable the members intent.
+
+    .. warning::
+
+        This event does not have a way of differentiating whether a reaction is a
+        burst reaction (also known as "super reaction") or not. If you need this,
+        consider using :func:`on_raw_reaction_remove` instead.
 
     :param reaction: The current state of the reaction.
     :type reaction: :class:`Reaction`
@@ -3379,6 +3391,24 @@ of :class:`enum.Enum`.
     .. attribute:: creation_date
 
         Sort forum posts by creation time (from most recent to oldest).
+
+.. class:: SelectDefaultValueType
+
+    Represents the default value of a select menu.
+
+    .. versionadded:: 2.4
+
+    .. attribute:: user
+
+        The underlying type of the ID is a user.
+
+    .. attribute:: role
+
+        The underlying type of the ID is a role.
+
+    .. attribute:: channel
+
+        The underlying type of the ID is a channel or thread.
 
 
 .. _discord-api-audit-logs:
