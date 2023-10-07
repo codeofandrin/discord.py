@@ -2,5 +2,5 @@ aiohttp>=3.7.4,<4
 Sphinx==5.1.1
 sphinxcontrib_trio==1.1.2
 black==22.6
-pyright==1.1.289
+pyright==1.1.316
 pytest
