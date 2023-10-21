@@ -135,6 +135,10 @@ class AutoModRuleAction:
             raise ValueError('Only one of channel_id, duration, or custom_message can be passed.')
 
         self.type: AutoModRuleActionType
+        self.channel_id: Optional[int] = None
+        self.duration: Optional[datetime.timedelta] = None
+        self.custom_message: Optional[str] = None
+
         if type is not None:
             self.type = type
         elif channel_id is not None:
@@ -147,14 +151,15 @@ class AutoModRuleAction:
         if self.type is AutoModRuleActionType.send_alert_message:
             if channel_id is None:
                 raise ValueError('channel_id cannot be None if type is send_alert_message')
-            self.channel_id: Optional[int] = channel_id
+            self.channel_id = channel_id
 
         if self.type is AutoModRuleActionType.timeout:
             if duration is None:
                 raise ValueError('duration cannot be None set if type is timeout')
-            self.duration: Optional[datetime.timedelta] = duration
+            self.duration = duration
 
-        self.custom_message: Optional[str] = custom_message
+        if self.type is AutoModRuleActionType.block_message:
+            self.custom_message = custom_message
 
     def __repr__(self) -> str:
         return f'<AutoModRuleAction type={self.type.value} channel={self.channel_id} duration={self.duration}>'
@@ -213,8 +218,8 @@ class AutoModTrigger:
     type: :class:`AutoModRuleTriggerType`
         The type of trigger.
     keyword_filter: List[:class:`str`]
-        The list of strings that will trigger the keyword filter. Maximum of 1000.
-        Keywords can only be up to 60 characters in length.
+        The list of strings that will trigger the filter.
+        Maximum of 1000. Keywords can only be up to 60 characters in length.
 
         This could be combined with :attr:`regex_patterns`.
     regex_patterns: List[:class:`str`]
@@ -260,8 +265,11 @@ class AutoModTrigger:
         regex_patterns: Optional[List[str]] = None,
         mention_raid_protection: Optional[bool] = None,
     ) -> None:
-        if type is None and sum(arg is not None for arg in (keyword_filter or regex_patterns, presets, mention_limit)) > 1:
-            raise ValueError('Please pass only one of keyword_filter, regex_patterns, presets, or mention_limit.')
+        unique_args = (keyword_filter or regex_patterns, presets, mention_limit or mention_raid_protection)
+        if type is None and sum(arg is not None for arg in unique_args) > 1:
+            raise ValueError(
+                'Please pass only one of keyword_filter/regex_patterns, presets, or mention_limit/mention_raid_protection.'
+            )
 
         if type is not None:
             self.type = type
@@ -273,7 +281,7 @@ class AutoModTrigger:
             self.type = AutoModRuleTriggerType.mention_spam
         else:
             raise ValueError(
-                'Please pass the trigger type explicitly if not using keyword_filter, presets, or mention_limit.'
+                'Please pass the trigger type explicitly if not using keyword_filter, regex_patterns, presets, mention_limit, or mention_raid_protection.'
             )
 
         self.keyword_filter: List[str] = keyword_filter if keyword_filter is not None else []
@@ -296,7 +304,7 @@ class AutoModTrigger:
         type_ = try_enum(AutoModRuleTriggerType, type)
         if data is None:
             return cls(type=type_)
-        elif type_ is AutoModRuleTriggerType.keyword:
+        elif type_ in (AutoModRuleTriggerType.keyword, AutoModRuleTriggerType.member_profile):
             return cls(
                 type=type_,
                 keyword_filter=data.get('keyword_filter'),
@@ -317,7 +325,7 @@ class AutoModTrigger:
             return cls(type=type_)
 
     def to_metadata_dict(self) -> Optional[Dict[str, Any]]:
-        if self.type is AutoModRuleTriggerType.keyword:
+        if self.type in (AutoModRuleTriggerType.keyword, AutoModRuleTriggerType.member_profile):
             return {
                 'keyword_filter': self.keyword_filter,
                 'regex_patterns': self.regex_patterns,
@@ -355,6 +363,8 @@ class AutoModRule:
         The IDs of the roles that are exempt from the rule.
     exempt_channel_ids: Set[:class:`int`]
         The IDs of the channels that are exempt from the rule.
+    event_type: :class:`AutoModRuleEventType`
+        The type of event that will trigger the the rule.
     """
 
     __slots__ = (
