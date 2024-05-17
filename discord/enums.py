@@ -73,10 +73,8 @@ __all__ = (
     'SKUType',
     'EntitlementType',
     'EntitlementOwnerType',
+    'PollLayoutType',
 )
-
-if TYPE_CHECKING:
-    from typing_extensions import Self
 
 
 def _create_value_cls(name: str, comparable: bool):
@@ -104,7 +102,14 @@ class EnumMeta(type):
         _enum_member_map_: ClassVar[Dict[str, Any]]
         _enum_value_map_: ClassVar[Dict[Any, Any]]
 
-    def __new__(cls, name: str, bases: Tuple[type, ...], attrs: Dict[str, Any], *, comparable: bool = False) -> Self:
+    def __new__(
+        cls,
+        name: str,
+        bases: Tuple[type, ...],
+        attrs: Dict[str, Any],
+        *,
+        comparable: bool = False,
+    ) -> EnumMeta:
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -792,17 +797,30 @@ class SelectDefaultValueType(Enum):
 
 
 class SKUType(Enum):
+    durable = 2
+    consumable = 3
     subscription = 5
     subscription_group = 6
 
 
 class EntitlementType(Enum):
+    purchase = 1
+    premium_subscription = 2
+    developer_gift = 3
+    test_mode_purchase = 4
+    free_purchase = 5
+    user_gift = 6
+    premium_purchase = 7
     application_subscription = 8
 
 
 class EntitlementOwnerType(Enum):
     guild = 1
     user = 2
+
+
+class PollLayoutType(Enum):
+    default = 1
 
 
 def create_unknown_value(cls: Type[E], val: Any) -> E:
