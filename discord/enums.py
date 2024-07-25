@@ -603,7 +603,7 @@ class InteractionResponseType(Enum):
     message_update = 7  # for components
     autocomplete_result = 8
     modal = 9  # for modals
-    premium_required = 10
+    # premium_required = 10 (deprecated)
 
 
 class VideoQualityMode(Enum):
@@ -635,6 +635,7 @@ class ButtonStyle(Enum):
     success = 3
     danger = 4
     link = 5
+    premium = 6
 
     # Aliases
     blurple = 1
@@ -827,6 +828,11 @@ class InviteType(Enum):
     guild = 0
     group_dm = 1
     friend = 2
+
+
+class ReactionType(Enum):
+    normal = 0
+    burst = 1
 
 
 def create_unknown_value(cls: Type[E], val: Any) -> E:
