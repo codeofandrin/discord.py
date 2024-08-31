@@ -1,4 +1,5 @@
 aiohttp>=3.7.4,<4
+audioop-lts; python_version>='3.13'
 pyright==1.1.351
 black==22.6
 pytest
