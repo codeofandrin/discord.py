@@ -777,7 +777,15 @@ class HTTPClient:
             raise RuntimeError('Unreachable code in HTTP handling')
 
     async def get_from_cdn(self, url: str) -> bytes:
-        async with self.__session.get(url) as resp:
+        kwargs = {}
+
+        # Proxy support
+        if self.proxy is not None:
+            kwargs['proxy'] = self.proxy
+        if self.proxy_auth is not None:
+            kwargs['proxy_auth'] = self.proxy_auth
+
+        async with self.__session.get(url, **kwargs) as resp:
             if resp.status == 200:
                 return await resp.read()
             elif resp.status == 404:
@@ -2584,7 +2592,6 @@ class HTTPClient:
     def send_soundboard_sound(self, channel_id: Snowflake, **payload: Any) -> Response[None]:
         valid_keys = ('sound_id', 'source_guild_id')
         payload = {k: v for k, v in payload.items() if k in valid_keys}
-        print(payload)
         return self.request(
             (Route('POST', '/channels/{channel_id}/send-soundboard-sound', channel_id=channel_id)), json=payload
         )

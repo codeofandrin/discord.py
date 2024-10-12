@@ -1881,6 +1881,12 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.4
 
+    .. attribute:: purchase_notification
+
+        The system message sent when a purchase is made in the guild.
+
+        .. versionadded:: 2.5
+
 .. class:: UserFlags
 
     Represents Discord User flags.
@@ -3804,6 +3810,24 @@ of :class:`enum.Enum`.
         The subscription is inactive and not being charged.
 
 
+.. class:: MessageReferenceType
+
+    Represents the type of a message reference.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: reply
+
+        A message reply.
+
+    .. attribute:: forward
+
+        A forwarded message.
+
+    .. attribute:: default
+
+        An alias for :attr:`.reply`.
+
 .. _discord-api-audit-logs:
 
 Audit Log Data
@@ -5347,6 +5371,14 @@ PollAnswer
 
 .. _discord_api_data:
 
+MessageSnapshot
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: MessageSnapshot
+
+.. autoclass:: MessageSnapshot
+    :members:
+
 Data Classes
 --------------
 
@@ -5416,6 +5448,22 @@ RoleSubscriptionInfo
 .. attributetable:: RoleSubscriptionInfo
 
 .. autoclass:: RoleSubscriptionInfo
+    :members:
+
+PurchaseNotification
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: PurchaseNotification
+
+.. autoclass:: PurchaseNotification()
+    :members:
+
+GuildProductPurchase
++++++++++++++++++++++
+
+.. attributetable:: GuildProductPurchase
+
+.. autoclass:: GuildProductPurchase()
     :members:
 
 Intents
