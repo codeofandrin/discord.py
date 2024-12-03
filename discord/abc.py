@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import copy
 import time
+import secrets
 import asyncio
 from datetime import datetime
 from typing import (
@@ -1039,10 +1040,6 @@ class GuildChannel:
 
         .. versionadded:: 1.1
 
-        .. versionchanged:: 2.5
-
-            The ``category`` keyword-only parameter was added.
-
         Parameters
         ------------
         name: Optional[:class:`str`]
@@ -1051,6 +1048,8 @@ class GuildChannel:
         category: Optional[:class:`~discord.CategoryChannel`]
             The category the new channel belongs to.
             This parameter is ignored if cloning a category channel.
+
+            .. versionadded:: 2.5
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
@@ -1532,10 +1531,11 @@ class Messageable:
             .. versionadded:: 1.4
 
         reference: Union[:class:`~discord.Message`, :class:`~discord.MessageReference`, :class:`~discord.PartialMessage`]
-            A reference to the :class:`~discord.Message` to which you are replying, this can be created using
-            :meth:`~discord.Message.to_reference` or passed directly as a :class:`~discord.Message`. You can control
-            whether this mentions the author of the referenced message using the :attr:`~discord.AllowedMentions.replied_user`
-            attribute of ``allowed_mentions`` or by setting ``mention_author``.
+            A reference to the :class:`~discord.Message` to which you are referencing, this can be created using
+            :meth:`~discord.Message.to_reference` or passed directly as a :class:`~discord.Message`.
+            In the event of a replying reference, you can control whether this mentions the author of the referenced
+            message using the :attr:`~discord.AllowedMentions.replied_user` attribute of ``allowed_mentions`` or by
+            setting ``mention_author``.
 
             .. versionadded:: 1.6
 
@@ -1614,6 +1614,9 @@ class Messageable:
             flags.suppress_notifications = silent
         else:
             flags = MISSING
+
+        if nonce is None:
+            nonce = secrets.randbits(64)
 
         with handle_message_parameters(
             content=content,

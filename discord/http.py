@@ -97,6 +97,7 @@ if TYPE_CHECKING:
         subscription,
     )
     from .types.snowflake import Snowflake, SnowflakeList
+    from .types.gateway import SessionStartLimit
 
     from types import TracebackType
 
@@ -197,6 +198,7 @@ def handle_message_parameters(
 
     if nonce is not None:
         payload['nonce'] = str(nonce)
+        payload['enforce_nonce'] = True
 
     if message_reference is not MISSING:
         payload['message_reference'] = message_reference
@@ -308,7 +310,7 @@ class Route:
         self.metadata: Optional[str] = metadata
         url = self.BASE + self.path
         if parameters:
-            url = url.format_map({k: _uriquote(v) if isinstance(v, str) else v for k, v in parameters.items()})
+            url = url.format_map({k: _uriquote(v, safe='') if isinstance(v, str) else v for k, v in parameters.items()})
         self.url: str = url
 
         # major parameters:
@@ -2752,13 +2754,13 @@ class HTTPClient:
 
     # Misc
 
-    async def get_bot_gateway(self) -> Tuple[int, str]:
+    async def get_bot_gateway(self) -> Tuple[int, str, SessionStartLimit]:
         try:
             data = await self.request(Route('GET', '/gateway/bot'))
         except HTTPException as exc:
             raise GatewayNotFound() from exc
 
-        return data['shards'], data['url']
+        return data['shards'], data['url'], data['session_start_limit']
 
     def get_user(self, user_id: Snowflake) -> Response[user.User]:
         return self.request(Route('GET', '/users/{user_id}', user_id=user_id))
