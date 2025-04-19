@@ -108,7 +108,7 @@ __all__ = (
 )
 
 DISCORD_EPOCH = 1420070400000
-DEFAULT_FILE_SIZE_LIMIT_BYTES = 26214400
+DEFAULT_FILE_SIZE_LIMIT_BYTES = 10485760
 
 
 class _MissingSentinel:
@@ -327,7 +327,7 @@ def oauth_url(
     permissions: Permissions = MISSING,
     guild: Snowflake = MISSING,
     redirect_uri: str = MISSING,
-    scopes: Iterable[str] = MISSING,
+    scopes: Optional[Iterable[str]] = MISSING,
     disable_guild_select: bool = False,
     state: str = MISSING,
 ) -> str:
@@ -369,7 +369,8 @@ def oauth_url(
         The OAuth2 URL for inviting the bot into guilds.
     """
     url = f'https://discord.com/oauth2/authorize?client_id={client_id}'
-    url += '&scope=' + '+'.join(scopes or ('bot', 'applications.commands'))
+    if scopes is not None:
+        url += '&scope=' + '+'.join(scopes or ('bot', 'applications.commands'))
     if permissions is not MISSING:
         url += f'&permissions={permissions.value}'
     if guild is not MISSING:
@@ -713,13 +714,13 @@ async def maybe_coroutine(f: MaybeAwaitableFunc[P, T], *args: P.args, **kwargs: 
     if _isawaitable(value):
         return await value
     else:
-        return value  # type: ignore
+        return value
 
 
 async def async_all(
     gen: Iterable[Union[T, Awaitable[T]]],
     *,
-    check: Callable[[Union[T, Awaitable[T]]], TypeGuard[Awaitable[T]]] = _isawaitable,
+    check: Callable[[Union[T, Awaitable[T]]], TypeGuard[Awaitable[T]]] = _isawaitable,  # type: ignore
 ) -> bool:
     for elem in gen:
         if check(elem):
@@ -1120,7 +1121,7 @@ def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
     literal_cls = type(Literal[0])
     for p in parameters:
         if isinstance(p, literal_cls):
-            params.extend(p.__args__)
+            params.extend(p.__args__)  # type: ignore
         else:
             params.append(p)
     return tuple(params)
@@ -1531,3 +1532,11 @@ def _format_call_duration(duration: datetime.timedelta) -> str:
             formatted = f"{years} years"
 
     return formatted
+
+
+class _RawReprMixin:
+    __slots__: Tuple[str, ...] = ()
+
+    def __repr__(self) -> str:
+        value = ' '.join(f'{attr}={getattr(self, attr)!r}' for attr in self.__slots__)
+        return f'<{self.__class__.__name__} {value}>'
