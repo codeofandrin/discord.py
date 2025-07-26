@@ -461,7 +461,12 @@ class Ratelimit:
             future = self._loop.create_future()
             self._pending_requests.append(future)
             try:
-                await future
+                while not future.done():
+                    # 30 matches the smallest allowed max_ratelimit_timeout
+                    max_wait_time = self.expires - self._loop.time() if self.expires else 30
+                    await asyncio.wait([future], timeout=max_wait_time)
+                    if not future.done():
+                        await self._refresh()
             except:
                 future.cancel()
                 if self.remaining > 0 and not future.cancelled():
@@ -668,14 +673,13 @@ class HTTPClient:
                                     _log.debug(fmt, route_key, bucket_hash, discord_hash)
 
                                     self._bucket_hashes[route_key] = discord_hash
-                                    recalculated_key = discord_hash + route.major_parameters
-                                    self._buckets[recalculated_key] = ratelimit
+                                    self._buckets[f'{discord_hash}:{route.major_parameters}'] = ratelimit
                                     self._buckets.pop(key, None)
                                 elif route_key not in self._bucket_hashes:
                                     fmt = '%s has found its initial rate limit bucket hash (%s).'
                                     _log.debug(fmt, route_key, discord_hash)
                                     self._bucket_hashes[route_key] = discord_hash
-                                    self._buckets[discord_hash + route.major_parameters] = ratelimit
+                                    self._buckets[f'{discord_hash}:{route.major_parameters}'] = ratelimit
 
                         if has_ratelimit_headers:
                             if response.status != 429:
@@ -1830,6 +1834,7 @@ class HTTPClient:
         target_type: Optional[invite.InviteTargetType] = None,
         target_user_id: Optional[Snowflake] = None,
         target_application_id: Optional[Snowflake] = None,
+        flags: Optional[int] = None,
     ) -> Response[invite.Invite]:
         r = Route('POST', '/channels/{channel_id}/invites', channel_id=channel_id)
         payload = {
@@ -1847,6 +1852,9 @@ class HTTPClient:
 
         if target_application_id:
             payload['target_application_id'] = str(target_application_id)
+
+        if flags:
+            payload['flags'] = flags
 
         return self.request(r, reason=reason, json=payload)
 
@@ -1874,7 +1882,7 @@ class HTTPClient:
     def invites_from_channel(self, channel_id: Snowflake) -> Response[List[invite.Invite]]:
         return self.request(Route('GET', '/channels/{channel_id}/invites', channel_id=channel_id))
 
-    def delete_invite(self, invite_id: str, *, reason: Optional[str] = None) -> Response[None]:
+    def delete_invite(self, invite_id: str, *, reason: Optional[str] = None) -> Response[invite.Invite]:
         return self.request(Route('DELETE', '/invites/{invite_id}', invite_id=invite_id), reason=reason)
 
     # Role management
@@ -1889,7 +1897,7 @@ class HTTPClient:
         self, guild_id: Snowflake, role_id: Snowflake, *, reason: Optional[str] = None, **fields: Any
     ) -> Response[role.Role]:
         r = Route('PATCH', '/guilds/{guild_id}/roles/{role_id}', guild_id=guild_id, role_id=role_id)
-        valid_keys = ('name', 'permissions', 'color', 'hoist', 'icon', 'unicode_emoji', 'mentionable')
+        valid_keys = ('name', 'permissions', 'color', 'hoist', 'icon', 'unicode_emoji', 'mentionable', 'colors')
         payload = {k: v for k, v in fields.items() if k in valid_keys}
         return self.request(r, json=payload, reason=reason)
 

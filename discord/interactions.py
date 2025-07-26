@@ -154,6 +154,10 @@ class Interaction(Generic[ClientT]):
         The context of the interaction.
 
         .. versionadded:: 2.4
+    filesize_limit: int
+        The maximum number of bytes a file can have when responding to this interaction.
+
+        .. versionadded:: 2.6
     """
 
     __slots__: Tuple[str, ...] = (
@@ -172,7 +176,8 @@ class Interaction(Generic[ClientT]):
         'command_failed',
         'entitlement_sku_ids',
         'entitlements',
-        "context",
+        'context',
+        'filesize_limit',
         '_integration_owners',
         '_permissions',
         '_app_permissions',
@@ -214,6 +219,7 @@ class Interaction(Generic[ClientT]):
         self.application_id: int = int(data['application_id'])
         self.entitlement_sku_ids: List[int] = [int(x) for x in data.get('entitlement_skus', []) or []]
         self.entitlements: List[Entitlement] = [Entitlement(self._state, x) for x in data.get('entitlements', [])]
+        self.filesize_limit: int = data['attachment_size_limit']
         # This is not entirely useful currently, unsure how to expose it in a way that it is.
         self._integration_owners: Dict[int, Snowflake] = {
             int(k): int(v) for k, v in data.get('authorizing_integration_owners', {}).items()
@@ -705,6 +711,9 @@ class InteractionCallbackResponse(Generic[ClientT]):
         self._parent: Interaction[ClientT] = parent
         self.type: InteractionResponseType = type
         self._update(data)
+
+    def __repr__(self) -> str:
+        return f'<InteractionCallbackResponse id={self.id} type={self.type!r}>'
 
     def _update(self, data: InteractionCallbackPayload) -> None:
         interaction = data['interaction']
@@ -1286,6 +1295,52 @@ class InteractionResponse(Generic[ClientT]):
         )
 
         self._response_type = InteractionResponseType.autocomplete_result
+
+    async def launch_activity(self) -> InteractionCallbackResponse[ClientT]:
+        """|coro|
+
+        Responds to this interaction by launching the activity associated with the app.
+        Only available for apps with activities enabled.
+
+        .. versionadded:: 2.6
+
+        Raises
+        -------
+        HTTPException
+            Launching the activity failed.
+        InteractionResponded
+            This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The interaction callback data.
+        """
+        if self._response_type:
+            raise InteractionResponded(self._parent)
+
+        parent = self._parent
+
+        adapter = async_context.get()
+        http = parent._state.http
+
+        params = interaction_response_params(InteractionResponseType.launch_activity.value)
+        response = await adapter.create_interaction_response(
+            parent.id,
+            parent.token,
+            session=parent._session,
+            proxy=http.proxy,
+            proxy_auth=http.proxy_auth,
+            params=params,
+        )
+        self._response_type = InteractionResponseType.launch_activity
+
+        return InteractionCallbackResponse(
+            data=response,
+            parent=self._parent,
+            state=self._parent._state,
+            type=self._response_type,
+        )
 
 
 class _InteractionMessageState:

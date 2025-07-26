@@ -927,25 +927,25 @@ Members
 .. function:: on_raw_presence_update(payload)
 
     Called when a :class:`Member` updates their presence.
-    
+
     This requires :attr:`Intents.presences` to be enabled.
 
-    Unlike :func:`on_presence_update`, when enabled, this is called regardless of the state of internal guild 
+    Unlike :func:`on_presence_update`, when enabled, this is called regardless of the state of internal guild
     and member caches, and **does not** provide a comparison between the previous and updated states of the :class:`Member`.
 
     .. important::
 
-        By default, this event is only dispatched when :attr:`Intents.presences` is enabled **and** :attr:`Intents.members` 
+        By default, this event is only dispatched when :attr:`Intents.presences` is enabled **and** :attr:`Intents.members`
         is disabled.
 
         You can manually override this behaviour by setting the **enable_raw_presences** flag in the :class:`Client`,
         however :attr:`Intents.presences` is always required for this event to work.
-    
+
     .. versionadded:: 2.5
 
     :param payload: The raw presence update event model.
     :type payload: :class:`RawPresenceUpdateEvent`
-        
+
 
 Messages
 ~~~~~~~~~
@@ -1354,8 +1354,10 @@ Soundboard
 
     .. versionadded:: 2.5
 
-    :param sound: The soundboard sound that was updated.
-    :type sound: :class:`SoundboardSound`
+    :param before: The soundboard sound before the update.
+    :type before: :class:`SoundboardSound`
+    :param after: The soundboard sound after the update.
+    :type after: :class:`SoundboardSound`
 
 
 Stages
@@ -2454,6 +2456,8 @@ of :class:`enum.Enum`.
         Possible attributes for :class:`AuditLogDiff`:
 
         - :attr:`~AuditLogDiff.colour`
+        - :attr:`~AuditLogDiff.secondary_colour`
+        - :attr:`~AuditLogDiff.tertiary_colour`
         - :attr:`~AuditLogDiff.mentionable`
         - :attr:`~AuditLogDiff.hoist`
         - :attr:`~AuditLogDiff.icon`
@@ -2477,6 +2481,8 @@ of :class:`enum.Enum`.
         Possible attributes for :class:`AuditLogDiff`:
 
         - :attr:`~AuditLogDiff.colour`
+        - :attr:`~AuditLogDiff.secondary_colour`
+        - :attr:`~AuditLogDiff.tertiary_colour`
         - :attr:`~AuditLogDiff.mentionable`
         - :attr:`~AuditLogDiff.hoist`
         - :attr:`~AuditLogDiff.icon`
@@ -2494,6 +2500,8 @@ of :class:`enum.Enum`.
         Possible attributes for :class:`AuditLogDiff`:
 
         - :attr:`~AuditLogDiff.colour`
+        - :attr:`~AuditLogDiff.secondary_colour`
+        - :attr:`~AuditLogDiff.tertiary_colour`
         - :attr:`~AuditLogDiff.mentionable`
         - :attr:`~AuditLogDiff.hoist`
         - :attr:`~AuditLogDiff.name`
@@ -2515,6 +2523,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.uses`
         - :attr:`~AuditLogDiff.max_uses`
+        - :attr:`~AuditLogDiff.flags`
 
     .. attribute:: invite_update
 
@@ -2539,6 +2548,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.uses`
         - :attr:`~AuditLogDiff.max_uses`
+        - :attr:`~AuditLogDiff.flags`
 
     .. attribute:: webhook_create
 
@@ -4206,6 +4216,24 @@ AuditLogDiff
 
         :type: :class:`Colour`
 
+    .. attribute:: secondary_colour
+                   secondary_color
+
+        The secondary colour of a role.
+
+        See also :attr:`Role.secondary_colour`
+
+        :type: Optional[:class:`Colour`]
+
+    .. attribute:: tertiary_colour
+                   tertiary_color
+
+        The tertiary colour of a role.
+
+        See also :attr:`Role.tertiary_colour`
+
+        :type: Optional[:class:`Colour`]
+
     .. attribute:: hoist
 
         Whether the role is being hoisted or not.
@@ -4550,11 +4578,11 @@ AuditLogDiff
 
     .. attribute:: flags
 
-        The channel flags associated with this thread or forum post.
+        The flags associated with this thread, forum post or invite.
 
-        See also :attr:`ForumChannel.flags` and :attr:`Thread.flags`
+        See also :attr:`ForumChannel.flags`, :attr:`Thread.flags` and :attr:`Invite.flags`
 
-        :type: :class:`ChannelFlags`
+        :type: Union[:class:`ChannelFlags`, :class:`InviteFlags`]
 
     .. attribute:: default_thread_slowmode_delay
 
@@ -5453,6 +5481,14 @@ ClientStatus
 .. autoclass:: ClientStatus()
     :members:
 
+PrimaryGuild
+~~~~~~~~~~~~
+
+.. attributetable:: PrimaryGuild
+
+.. autoclass:: PrimaryGuild()
+    :members:
+
 Data Classes
 --------------
 
@@ -5730,6 +5766,14 @@ EmbedFlags
 .. attributetable:: EmbedFlags
 
 .. autoclass:: EmbedFlags()
+    :members:
+
+InviteFlags
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: InviteFlags
+
+.. autoclass:: InviteFlags()
     :members:
 
 ForumTag
