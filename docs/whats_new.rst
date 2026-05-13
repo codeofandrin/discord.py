@@ -11,6 +11,228 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
+.. _vp2p7p1:
+
+v2.7.1
+-------
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fix memory leak when using :class:`ui.LayoutView` and removing items but those items not being removed from internal cache.
+- Fix ``aiohttp`` deprecation warning for websocket timeouts (:issue:`10418`)
+
+Miscellaneous
+~~~~~~~~~~~~~~
+
+- Show ``davey`` dependency output in ``python -m discord --version`` to debug DAVE issues
+- Raise an error and warn when ``davey`` is not installed and using voice
+- Change how views are bound to the internal cache when using interactions
+
+.. _vp2p7p0:
+
+v2.7.0
+-------
+
+New Features
+~~~~~~~~~~~~~
+
+- Add DAVE protocol support for voice connections (:issue:`10300`)
+- Add support for new :class:`ui.Modal` components (:issue:`10390`)
+    - :class:`CheckboxGroupComponent` corresponds to :class:`ui.CheckboxGroup`
+    - :class:`CheckboxComponent` corresponds to :class:`ui.Checkbox`
+    - :class:`RadioGroupComponent` corresponds to :class:`ui.RadioGroup`
+    - :class:`CheckboxGroupOption` and :class:`RadioGroupOption` allow creating these options
+
+- Add timestamp converter and transformer for use with new ``@time`` markdown option (:issue:`10388`)
+    - This is accessible via :class:`app_commands.Timestamp` and :class:`ext.commands.Timestamp` as an annotation
+
+- Add several new permissions:
+    - :attr:`Permissions.bypass_slowmode` (:issue:`10350`)
+    - :attr:`Permissions.set_voice_channel_status` (:issue:`10279`)
+    - :attr:`Permissions.pin_messages`
+
+- Add ``client`` parameter to :meth:`PartialEmoji.from_str` (:issue:`10407`)
+- Add support for user collectibles accessible via :attr:`User.collectibles` and :attr:`Member.collectibles` (:issue:`10277`)
+- Add :meth:`Message.is_forwardable` to check if a message can be forwarded (:issue:`10353`)
+- Add support for getting an integration's scopes (:issue:`10352`)
+- Add :attr:`Interaction.command_id` and :attr:`Interaction.custom_id` helpers (:issue:`10321`)
+- Support new fields in :meth:`Member.edit` (:issue:`10303`)
+- Add support for getting role member counts via :meth:`Guild.role_member_counts`
+- Add :attr:`MessageType.is_deletable`
+- Add ``reason`` keyword argument to :meth:`Client.delete_invite` (:issue:`10318`, :issue:`10340`)
+- Add ``silent`` parameter to :meth:`ForumChannel.create_thread` (:issue:`10304`)
+- Add support for :attr:`MessageType.emoji_added` (:issue:`10284`)
+- Add channel attribute to automod quarantine user AuditLogAction (:issue:`10274`)
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fix FFmpeg errors not sent to after callback (:issue:`10387`)
+- Fix :meth:`Webhook.edit_message` missing the view parameter (:issue:`10395`, :issue:`10398`)
+- Fix :meth:`TextChannel.purge` failing when encountering certain system messages
+- Fix :attr:`Message.call` raising an attribute error when accessed (:issue:`10404`)
+- Fix certain component IDs not being able to be settable afterwards
+- Fix :class:`ui.Modal` not raising when hitting the 5 item limit
+- Fix :attr:`ui.Item.row` not being set appropriately when used in a :class:`ui.Modal` (:issue:`10397`)
+- Fix ``compression.zstd`` not working as expected when Discord does not send encoding information (:issue:`10344`)
+- Fix rare bug where :attr:`Client.latency` was incorrect due to not updating heartbeat state
+- Fix overzealous exporting of symbols within an internal ``primary_guild`` module (:issue:`10295`)
+- Close websocket when reconnecting websocket during polling (:issue:`10409`)
+- Use :meth:`ui.View.walk_children` when removing items from the view cache (:issue:`10402`)
+- |commands| Fix flag annotations not working under Python 3.14
+- |commands| Fix decorator order mattering for hybrid commands
+- |commands| Fix :meth:`~ext.commands.Context.from_interaction` derived :attr:`Message.type` being incorrect
+
+Miscellaneous
+~~~~~~~~~~~~~~
+
+- Allow :class:`ui.View` initialization without a running event loop (:issue:`10367`)
+- Optimise :func:`utils.find` and specialise :func:`utils.as_chunks` (:issue:`10351`)
+- Detach :attr:`ui.Item.view` when the item is removed (:issue:`10348`)
+- Change ``description`` to be optional when creating emoji (:issue:`10346`)
+- Don't assume Python 3.14 always has ``compression.zstd`` (:issue:`10328`)
+- Use webp as the default emoji URL format
+- |tasks| Log handled exceptions before sleeping
+
+
+.. _vp2p6p4:
+
+v2.6.4
+-------
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fix :class:`InviteType` and :class:`ReactionType` not being exported (:issue:`10310`)
+- Fix :class:`ui.Modal` submits not working for components without a ``custom_id`` (:issue:`10307`)
+- Fix ``required`` keyword argument missing in most :class:`ui.Select` classes (:issue:`10307`)
+- Fix incorrect handling of :class:`ui.Modal` submit data when using selects (:issue:`10307`)
+- Fix potential exception when assigning :attr:`ui.Container.children`
+- Fix :attr:`ui.Section.accessory` setter not updating internal state leading to an exception
+
+Miscellaneous
+~~~~~~~~~~~~~~
+
+- Use ``compression.zstd`` from the standard library if available on Python 3.14 (:issue:`10323`)
+
+.. _vp2p6p3:
+
+v2.6.3
+-------
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fix :attr:`ui.Select.required` not being applied properly
+- Fix potential attribute error when accessing :class:`LabelComponent`
+- Fix issue when stacking decorators such as :func:`app_commands.guild_install` and :func:`app_commands.user_install`
+
+.. _vp2p6p2:
+
+v2.6.2
+-------
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fix a bug with :class:`ui.DynamicItem` causing it to fail at runtime when passing a generic.
+
+.. _vp2p6p1:
+
+v2.6.1
+-------
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fix :attr:`ui.Section.children` and :attr:`ui.Section.accessory` having ``None`` as the :attr:`Item.parent` (:issue:`10269`)
+- Fix error when using a :class:`ui.DynamicItem` inside an :class:`ui.Section`
+- Fix :class:`ui.DynamicItem` not working when set as an :attr:`ui.Section.acessory` (:issue:`10271`)
+- Fix :attr:`ui.LayoutView.total_children_count` being inaccurate when adding nested items
+- Fix crash when accessing :attr:`AuditLogEntry.category` for unknown audit log actions
+- |tasks| Add logging statement when a handled exception occurs (:issue:`10276`)
+
+.. _vp2p6p0:
+
+v2.6.0
+--------
+
+New Features
+~~~~~~~~~~~~~~
+
+- Add support for Discord's "Components v2" (:issue:`10166`)
+    - A new :class:`ui.LayoutView` is used to use these components which requires manual layouting.
+    - Backwards compatibility is maintained with everything, including :class:`ui.DynamicItem`.
+    - Adds the following new components with their UI counterpart
+        - :class:`SectionComponent` corresponds to  :class:`ui.Section`
+        - :class:`TextDisplay` corresponds to  :class:`ui.TextDisplay`
+        - :class:`ThumbnailComponent` corresponds to  :class:`ui.Thumbnail`
+        - :class:`MediaGalleryComponent` corresponds to  :class:`ui.MediaGallery`
+        - :class:`FileComponent` corresponds to  :class:`ui.File`
+        - :class:`SeparatorComponent` corresponds to  :class:`ui.Separator`
+        - :class:`Container` corresponds to  :class:`ui.Container`
+        - :class:`ActionRow` corresponds to  :class:`ui.ActionRow`
+
+- Add support for the first phase for :class:`discord.ui.Modal` improvements.
+    - This allows :class:`discord.ui.Select` within modals
+    - This also allows :class:`discord.ui.Label` for better control of the forms within modals.
+    - This changes :attr:`discord.ui.TextInput.label` to be optional and is deprecated over :class:`discord.ui.Label`.
+    - As of this writing, this Discord update is not available to users yet.
+
+- Add support for guild tags (also known as primary guilds) (:issue:`10211`)
+    - This is through the :class:`PrimaryGuild` class.
+    - You retrieve this via :attr:`Member.primary_guild`.
+
+- Add support for the new pins endpoint (:issue:`10205`)
+    - This turns :meth:`abc.Messageable.pins` into an async iterator.
+    - The old eager behaviour of using ``await`` is still supported, but is now deprecated.
+
+- Add support for guild onboarding (:issue:`10226`, :issue:`9260`)
+- Add support for :attr:`MemberFlags.automod_quarantined_guild_tag` (:issue:`10236`)
+- Add support new gradient and holographic role colours (:issue:`10214`, :issue:`10225`)
+- Add :attr:`Locale.language_code` attribute (:issue:`10222`)
+- Add support for guest invites (:issue:`10220`)
+- Add :attr:`File.uri` to get the ``attachment://<filename>`` URI of a file
+- Add support for :meth:`InteractionResponse.launch_activity` responses (:issue:`10193`)
+- Add ability to create a media-only forum channel via ``media`` parameter in :meth:`Guild.create_forum` (:issue:`10170`)
+- Add :attr:`Interaction.filesize_limit` (:issue:`10159`)
+- Add new colours from the new Discord themes (:issue:`10152`)
+    - This updates the old :meth:`Colour.dark_theme`, :meth:`Colour.light_theme`, :meth:`Colour.light_embed` and :meth:`Colour.dark_embed`
+    - This adds :meth:`Colour.ash_theme`, :meth:`Colour.ash_embed`, :meth:`Colour.onyx_theme`, and :meth:`Colour.onyx_embed`
+
+- Add support for new fields to read in :class:`Activity` (:issue:`10227`)
+    - Adds the new :class:`StatusDisplayType` enum
+
+- Add :meth:`Permissions.apps` classmethod category (:issue:`10147`)
+- Add more attributes to :class:`app_commands.AppCommandThread` and :class:`app_commands.AppCommandChannel` (:issue:`10180`, :issue:`10252`)
+
+Bug Fixes
+~~~~~~~~~~~
+
+- Fix context install decorators to explicitly restrict commands
+- Fix error when sending non-interactive views via partial webhooks (:issue:`10235`)
+- Fix voice connection issues and upgrade the voice version to 8 (:issue:`10210`)
+- Fix calculation of hashed rate limit keys (:issue:`10215`)
+- Fix :attr:`Thread.applied_tags` being empty for media channels (:issue:`10178`)
+- Fix :meth:`Embed.to_dict` for user-inherited Embed classes (:issue:`10173`)
+- Fix potentially stuck ratelimit buckets in certain circumstances (:issue:`10160`)
+- Fix ``__bool__`` being incorrect for :class:`Embed` (:issue:`10154`)
+- Fix audit log ``automod_rule_trigger_type`` extra being missing (:issue:`10244`)
+- Properly transform media channels in app commands (:issue:`10177`)
+- |commands| Fix certain converters not working under ``Optional`` type hint in hybrids (:issue:`10239`, :issue:`10245`)
+
+Miscellaneous
+~~~~~~~~~~~~~~
+
+- Skip ``GUILD_MEMBER_ADD`` if the member is already cached (:issue:`10238`)
+- Deprecate various methods involving guild creation (:issue:`10164`, :issue:`10246`)
+- Deprecate the ``with_expiration`` parameter in :meth:`Client.fetch_invite` (:issue:`10259`)
+- Allow creating NSFW voice/stage channels (:issue:`10200`)
+- The :class:`Invite` is now returned when using :meth:`Invite.delete` or :meth:`Client.delete_invite` (:issue:`10181`)
+- Copy Select options when creating View class (:issue:`10143`)
+- Update PyNaCl minimum version dependency (:issue:`10127`)
+
 .. _vp2p5p2:
 
 v2.5.2

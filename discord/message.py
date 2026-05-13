@@ -96,15 +96,14 @@ if TYPE_CHECKING:
     from .types.gateway import MessageReactionRemoveEvent, MessageUpdateEvent
     from .abc import Snowflake
     from .abc import GuildChannel, MessageableChannel
-    from .components import ActionRow, ActionRowChildComponentType
+    from .components import MessageComponentType
     from .state import ConnectionState
     from .mentions import AllowedMentions
     from .user import User
     from .role import Role
-    from .ui.view import View
+    from .ui.view import View, LayoutView
 
     EmojiInputType = Union[Emoji, PartialEmoji, str]
-    MessageComponentType = Union[ActionRow, ActionRowChildComponentType]
 
 
 __all__ = (
@@ -449,7 +448,7 @@ class DeletedReferencedMessage:
         self._parent: MessageReference = parent
 
     def __repr__(self) -> str:
-        return f"<DeletedReferencedMessage id={self.id} channel_id={self.channel_id} guild_id={self.guild_id!r}>"
+        return f'<DeletedReferencedMessage id={self.id} channel_id={self.channel_id} guild_id={self.guild_id!r}>'
 
     @property
     def id(self) -> int:
@@ -489,7 +488,7 @@ class MessageSnapshot:
         Extra features of the the message snapshot.
     stickers: List[:class:`StickerItem`]
         A list of sticker items given to the message.
-    components: List[Union[:class:`ActionRow`, :class:`Button`, :class:`SelectMenu`]]
+    components: List[:class:`Component`]]
         A list of components in the message.
     """
 
@@ -533,7 +532,7 @@ class MessageSnapshot:
 
         self.components: List[MessageComponentType] = []
         for component_data in data.get('components', []):
-            component = _component_factory(component_data)
+            component = _component_factory(component_data, state)  # type: ignore
             if component is not None:
                 self.components.append(component)
 
@@ -884,7 +883,9 @@ class MessageInteractionMetadata(Hashable):
         self.modal_interaction: Optional[MessageInteractionMetadata] = None
         try:
             self.modal_interaction = MessageInteractionMetadata(
-                state=state, guild=guild, data=data['triggering_interaction_metadata']  # type: ignore # EAFP
+                state=state,
+                guild=guild,
+                data=data['triggering_interaction_metadata'],  # type: ignore # EAFP
             )
         except KeyError:
             pass
@@ -1306,32 +1307,6 @@ class PartialMessage(Hashable):
         else:
             await self._state.http.delete_message(self.channel.id, self.id)
 
-    @overload
-    async def edit(
-        self,
-        *,
-        content: Optional[str] = ...,
-        embed: Optional[Embed] = ...,
-        attachments: Sequence[Union[Attachment, File]] = ...,
-        delete_after: Optional[float] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
-        view: Optional[View] = ...,
-    ) -> Message:
-        ...
-
-    @overload
-    async def edit(
-        self,
-        *,
-        content: Optional[str] = ...,
-        embeds: Sequence[Embed] = ...,
-        attachments: Sequence[Union[Attachment, File]] = ...,
-        delete_after: Optional[float] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
-        view: Optional[View] = ...,
-    ) -> Message:
-        ...
-
     async def edit(
         self,
         *,
@@ -1341,7 +1316,7 @@ class PartialMessage(Hashable):
         attachments: Sequence[Union[Attachment, File]] = MISSING,
         delete_after: Optional[float] = None,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
-        view: Optional[View] = MISSING,
+        view: Optional[Union[View, LayoutView]] = MISSING,
     ) -> Message:
         """|coro|
 
@@ -1391,9 +1366,15 @@ class PartialMessage(Hashable):
             are used instead.
 
             .. versionadded:: 1.4
-        view: Optional[:class:`~discord.ui.View`]
+        view: Optional[Union[:class:`~discord.ui.View`, :class:`~discord.ui.LayoutView`]]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
+
+            .. note::
+
+                If you want to update the message to have a :class:`~discord.ui.LayoutView`, you must
+                explicitly set the ``content``, ``embed``, ``embeds``, and ``attachments`` parameters to
+                ``None`` if the previous message had any.
 
         Raises
         -------
@@ -1433,12 +1414,8 @@ class PartialMessage(Hashable):
             data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
             message = Message(state=self._state, channel=self.channel, data=data)
 
-        if view and not view.is_finished():
-            interaction: Optional[MessageInteraction] = getattr(self, 'interaction', None)
-            if interaction is not None:
-                self._state.store_view(view, self.id, interaction_id=interaction.id)
-            else:
-                self._state.store_view(view, self.id)
+        if view and not view.is_finished() and view.is_dispatchable():
+            self._state.store_view(view, self.id)
 
         if delete_after is not None:
             await self.delete(delay=delete_after)
@@ -1472,7 +1449,7 @@ class PartialMessage(Hashable):
 
         Pins the message.
 
-        You must have :attr:`~Permissions.manage_messages` to do
+        You must have :attr:`~Permissions.pin_messages` to do
         this in a non-private channel context.
 
         Parameters
@@ -1490,7 +1467,7 @@ class PartialMessage(Hashable):
             The message or channel was not found or deleted.
         HTTPException
             Pinning the message failed, probably due to the channel
-            having more than 50 pinned messages.
+            having more than 250 pinned messages.
         """
 
         await self._state.http.pin_message(self.channel.id, self.id, reason=reason)
@@ -1502,7 +1479,7 @@ class PartialMessage(Hashable):
 
         Unpins the message.
 
-        You must have :attr:`~Permissions.manage_messages` to do
+        You must have :attr:`~Permissions.pin_messages` to do
         this in a non-private channel context.
 
         Parameters
@@ -1759,6 +1736,36 @@ class PartialMessage(Hashable):
     @overload
     async def reply(
         self,
+        *,
+        file: File = ...,
+        view: LayoutView,
+        delete_after: float = ...,
+        nonce: Union[str, int] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        reference: Union[Message, MessageReference, PartialMessage] = ...,
+        mention_author: bool = ...,
+        suppress_embeds: bool = ...,
+        silent: bool = ...,
+    ) -> Message: ...
+
+    @overload
+    async def reply(
+        self,
+        *,
+        files: Sequence[File] = ...,
+        view: LayoutView,
+        delete_after: float = ...,
+        nonce: Union[str, int] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        reference: Union[Message, MessageReference, PartialMessage] = ...,
+        mention_author: bool = ...,
+        suppress_embeds: bool = ...,
+        silent: bool = ...,
+    ) -> Message: ...
+
+    @overload
+    async def reply(
+        self,
         content: Optional[str] = ...,
         *,
         tts: bool = ...,
@@ -1774,8 +1781,7 @@ class PartialMessage(Hashable):
         suppress_embeds: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def reply(
@@ -1795,8 +1801,7 @@ class PartialMessage(Hashable):
         suppress_embeds: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def reply(
@@ -1816,8 +1821,7 @@ class PartialMessage(Hashable):
         suppress_embeds: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def reply(
@@ -1837,8 +1841,7 @@ class PartialMessage(Hashable):
         suppress_embeds: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     async def reply(self, content: Optional[str] = None, **kwargs: Any) -> Message:
         """|coro|
@@ -2092,7 +2095,7 @@ class Message(PartialMessage, Hashable):
         A list of sticker items given to the message.
 
         .. versionadded:: 1.6
-    components: List[Union[:class:`ActionRow`, :class:`Button`, :class:`SelectMenu`]]
+    components: List[:class:`Component`]
         A list of components in the message.
         If :attr:`Intents.message_content` is not enabled this will always be an empty list
         unless the bot is mentioned or the message is a direct message.
@@ -2174,6 +2177,7 @@ class Message(PartialMessage, Hashable):
         'call',
         'purchase_notification',
         'message_snapshots',
+        '_pinned_at',
     )
 
     if TYPE_CHECKING:
@@ -2213,6 +2217,9 @@ class Message(PartialMessage, Hashable):
         self.application_id: Optional[int] = utils._get_as_snowflake(data, 'application_id')
         self.stickers: List[StickerItem] = [StickerItem(data=d, state=state) for d in data.get('sticker_items', [])]
         self.message_snapshots: List[MessageSnapshot] = MessageSnapshot._from_value(state, data.get('message_snapshots'))
+        self.call: Optional[CallMessage] = None
+        # Set by Messageable.pins
+        self._pinned_at: Optional[datetime.datetime] = None
 
         self.poll: Optional[Poll] = None
         try:
@@ -2503,11 +2510,8 @@ class Message(PartialMessage, Hashable):
         self.interaction_metadata = MessageInteractionMetadata(state=self._state, guild=self.guild, data=data)
 
     def _handle_call(self, data: CallMessagePayload):
-        self.call: Optional[CallMessage]
         if data is not None:
             self.call = CallMessage(state=self._state, message=self, data=data)
-        else:
-            self.call = None
 
     def _rebind_cached_references(
         self,
@@ -2634,6 +2638,18 @@ class Message(PartialMessage, Hashable):
             return self._thread or self.guild.get_thread(self.id)
 
     @property
+    def pinned_at(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the time
+        when the message was pinned.
+
+        .. note::
+            This is only set for messages that are returned by :meth:`abc.Messageable.pins`.
+
+        .. versionadded:: 2.6
+        """
+        return self._pinned_at
+
+    @property
     @deprecated('interaction_metadata')
     def interaction(self) -> Optional[MessageInteraction]:
         """Optional[:class:`~discord.MessageInteraction`]: The interaction that this message is a response to.
@@ -2700,19 +2716,19 @@ class Message(PartialMessage, Hashable):
 
         if self.type is MessageType.new_member:
             formats = [
-                "{0} joined the party.",
-                "{0} is here.",
-                "Welcome, {0}. We hope you brought pizza.",
-                "A wild {0} appeared.",
-                "{0} just landed.",
-                "{0} just slid into the server.",
-                "{0} just showed up!",
-                "Welcome {0}. Say hi!",
-                "{0} hopped into the server.",
-                "Everyone welcome {0}!",
+                '{0} joined the party.',
+                '{0} is here.',
+                'Welcome, {0}. We hope you brought pizza.',
+                'A wild {0} appeared.',
+                '{0} just landed.',
+                '{0} just slid into the server.',
+                '{0} just showed up!',
+                'Welcome {0}. Say hi!',
+                '{0} hopped into the server.',
+                'Everyone welcome {0}!',
                 "Glad you're here, {0}.",
-                "Good to see you, {0}.",
-                "Yay you made it, {0}!",
+                'Good to see you, {0}.',
+                'Yay you made it, {0}!',
             ]
 
             created_at_ms = int(self.created_at.timestamp() * 1000)
@@ -2771,7 +2787,7 @@ class Message(PartialMessage, Hashable):
 
         if self.type is MessageType.thread_starter_message:
             if self.reference is None or self.reference.resolved is None:
-                return 'Sorry, we couldn\'t load the first message in this thread'
+                return "Sorry, we couldn't load the first message in this thread"
 
             # the resolved message for the reference will be a Message
             return self.reference.resolved.content  # type: ignore
@@ -2821,14 +2837,14 @@ class Message(PartialMessage, Hashable):
             if call_ended:
                 duration = utils._format_call_duration(self.call.duration)  # type: ignore # call can't be None here
                 if missed:
-                    return 'You missed a call from {0.author.name} that lasted {1}.'.format(self, duration)
+                    return f'You missed a call from {self.author.name} that lasted {duration}.'
                 else:
-                    return '{0.author.name} started a call that lasted {1}.'.format(self, duration)
+                    return f'{self.author.name} started a call that lasted {duration}.'
             else:
                 if missed:
-                    return '{0.author.name} started a call. \N{EM DASH} Join the call'.format(self)
+                    return f'{self.author.name} started a call. \N{EM DASH} Join the call'
                 else:
-                    return '{0.author.name} started a call.'.format(self)
+                    return f'{self.author.name} started a call.'
 
         if self.type is MessageType.purchase_notification and self.purchase_notification is not None:
             guild_product_purchase = self.purchase_notification.guild_product_purchase
@@ -2841,38 +2857,13 @@ class Message(PartialMessage, Hashable):
                 embed.fields,
                 name='poll_question_text',
             )
-            return f'{self.author.display_name}\'s poll {poll_title.value} has closed.'  # type: ignore
+            return f"{self.author.display_name}'s poll {poll_title.value} has closed."  # type: ignore
+
+        if self.type is MessageType.emoji_added:
+            return f'{self.author.name} added a new emoji, {self.content}'
 
         # Fallback for unknown message types
         return ''
-
-    @overload
-    async def edit(
-        self,
-        *,
-        content: Optional[str] = ...,
-        embed: Optional[Embed] = ...,
-        attachments: Sequence[Union[Attachment, File]] = ...,
-        suppress: bool = ...,
-        delete_after: Optional[float] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
-        view: Optional[View] = ...,
-    ) -> Message:
-        ...
-
-    @overload
-    async def edit(
-        self,
-        *,
-        content: Optional[str] = ...,
-        embeds: Sequence[Embed] = ...,
-        attachments: Sequence[Union[Attachment, File]] = ...,
-        suppress: bool = ...,
-        delete_after: Optional[float] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
-        view: Optional[View] = ...,
-    ) -> Message:
-        ...
 
     async def edit(
         self,
@@ -2884,7 +2875,7 @@ class Message(PartialMessage, Hashable):
         suppress: bool = False,
         delete_after: Optional[float] = None,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
-        view: Optional[View] = MISSING,
+        view: Optional[Union[View, LayoutView]] = MISSING,
     ) -> Message:
         """|coro|
 
@@ -2942,9 +2933,15 @@ class Message(PartialMessage, Hashable):
             are used instead.
 
             .. versionadded:: 1.4
-        view: Optional[:class:`~discord.ui.View`]
+        view: Optional[Union[:class:`~discord.ui.View`, :class:`~discord.ui.LayoutView`]]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
+
+            .. note::
+
+                If you want to update the message to have a :class:`~discord.ui.LayoutView`, you must
+                explicitly set the ``content``, ``embed``, ``embeds``, and ``attachments`` parameters to
+                ``None`` if the previous message had any.
 
         Raises
         -------
@@ -2991,7 +2988,7 @@ class Message(PartialMessage, Hashable):
             data = await self._state.http.edit_message(self.channel.id, self.id, params=params)
             message = Message(state=self._state, channel=self.channel, data=data)
 
-        if view and not view.is_finished():
+        if view and not view.is_finished() and view.is_dispatchable():
             self._state.store_view(view, self.id)
 
         if delete_after is not None:
@@ -3050,3 +3047,30 @@ class Message(PartialMessage, Hashable):
             The newly edited message.
         """
         return await self.edit(attachments=[a for a in self.attachments if a not in attachments])
+
+    def is_forwardable(self) -> bool:
+        """:class:`bool`: Whether the message can be forwarded using :meth:`Message.forward`.
+
+        A message is forwardable only if it is a basic message type and does not
+        contain a poll, call, or activity, and is not a system message.
+
+        .. versionadded:: 2.7
+        """
+        if self.type not in (
+            MessageType.default,
+            MessageType.reply,
+            MessageType.chat_input_command,
+            MessageType.context_menu_command,
+        ):
+            return False
+
+        if self.poll is not None:
+            return False
+
+        if self.call is not None:
+            return False
+
+        if self.activity is not None:
+            return False
+
+        return True

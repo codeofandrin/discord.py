@@ -75,9 +75,18 @@ __all__ = (
     'EntitlementType',
     'EntitlementOwnerType',
     'PollLayoutType',
+    'InviteType',
+    'ReactionType',
     'VoiceChannelEffectAnimationType',
     'SubscriptionStatus',
     'MessageReferenceType',
+    'StatusDisplayType',
+    'OnboardingPromptType',
+    'OnboardingMode',
+    'SeparatorSpacing',
+    'MediaItemLoadingState',
+    'CollectibleType',
+    'NameplatePalette',
 )
 
 
@@ -171,7 +180,7 @@ class EnumMeta(type):
         try:
             return cls._enum_value_map_[value]
         except (KeyError, TypeError):
-            raise ValueError(f"{value!r} is not a valid {cls.__name__}")
+            raise ValueError(f'{value!r} is not a valid {cls.__name__}')
 
     def __getitem__(cls, key: str) -> Any:
         return cls._enum_member_map_[key]
@@ -268,6 +277,17 @@ class MessageType(Enum):
     guild_incident_report_false_alarm = 39
     purchase_notification = 44
     poll_result = 46
+    emoji_added = 63
+
+    def is_deletable(self) -> bool:
+        return self not in {
+            MessageType.recipient_add,
+            MessageType.recipient_remove,
+            MessageType.call,
+            MessageType.channel_name_change,
+            MessageType.channel_icon_change,
+            MessageType.thread_starter_message,
+        }
 
 
 class SpeakingState(Enum):
@@ -398,8 +418,16 @@ class AuditLogAction(Enum):
     automod_block_message                             = 143
     automod_flag_message                              = 144
     automod_timeout_member                            = 145
+    automod_quarantine_user                           = 146
     creator_monetization_request_created              = 150
     creator_monetization_terms_accepted               = 151
+    onboarding_prompt_create                          = 163
+    onboarding_prompt_update                          = 164
+    onboarding_prompt_delete                          = 165
+    onboarding_create                                 = 166
+    onboarding_update                                 = 167
+    home_settings_create                              = 190
+    home_settings_update                              = 191
     # fmt: on
 
     @property
@@ -460,14 +488,22 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_block_message:                    None,
             AuditLogAction.automod_flag_message:                     None,
             AuditLogAction.automod_timeout_member:                   None,
+            AuditLogAction.automod_quarantine_user:                  None,
             AuditLogAction.creator_monetization_request_created:     None,
             AuditLogAction.creator_monetization_terms_accepted:      None,
             AuditLogAction.soundboard_sound_create:                  AuditLogActionCategory.create,
             AuditLogAction.soundboard_sound_update:                  AuditLogActionCategory.update,
             AuditLogAction.soundboard_sound_delete:                  AuditLogActionCategory.delete,
+            AuditLogAction.onboarding_prompt_create:                 AuditLogActionCategory.create,
+            AuditLogAction.onboarding_prompt_update:                 AuditLogActionCategory.update,
+            AuditLogAction.onboarding_prompt_delete:                 AuditLogActionCategory.delete,
+            AuditLogAction.onboarding_create:                        AuditLogActionCategory.create,
+            AuditLogAction.onboarding_update:                        AuditLogActionCategory.update,
+            AuditLogAction.home_settings_create:                     AuditLogActionCategory.create,
+            AuditLogAction.home_settings_update:                     AuditLogActionCategory.update,
         }
         # fmt: on
-        return lookup[self]
+        return lookup.get(self, None)
 
     @property
     def target_type(self) -> Optional[str]:
@@ -506,10 +542,16 @@ class AuditLogAction(Enum):
             return 'integration_or_app_command'
         elif 139 < v < 143:
             return 'auto_moderation'
-        elif v < 146:
+        elif v < 147:
             return 'user'
         elif v < 152:
             return 'creator_monetization'
+        elif v < 166:
+            return 'onboarding_prompt'
+        elif v < 168:
+            return 'onboarding'
+        elif v < 192:
+            return 'home_settings'
 
 
 class UserFlags(Enum):
@@ -643,6 +685,19 @@ class ComponentType(Enum):
     role_select = 6
     mentionable_select = 7
     channel_select = 8
+    section = 9
+    text_display = 10
+    thumbnail = 11
+    media_gallery = 12
+    file = 13
+    separator = 14
+    container = 17
+    label = 18
+    file_upload = 19
+    # checkpoint = 20
+    radio_group = 21
+    checkbox_group = 22
+    checkbox = 23
 
     def __int__(self) -> int:
         return self.value
@@ -770,13 +825,6 @@ class Locale(Enum):
 
     @property
     def language_code(self) -> str:
-        """:class:`str`: Returns the locale's BCP 47 language code in the format of ``language-COUNTRY``.
-
-        This is derived from a predefined mapping based on Discord's supported locales.
-        If no mapping exists for the current locale, this returns the raw locale value as a fallback.
-
-        .. versionadded:: 2.6
-        """
         return _UNICODE_LANG_MAP.get(self.value, self.value)
 
 
@@ -910,6 +958,52 @@ class SubscriptionStatus(Enum):
     active = 0
     ending = 1
     inactive = 2
+
+
+class StatusDisplayType(Enum):
+    name = 0  # pyright: ignore[reportAssignmentType]
+    state = 1
+    details = 2
+
+
+class OnboardingPromptType(Enum):
+    multiple_choice = 0
+    dropdown = 1
+
+
+class OnboardingMode(Enum):
+    default = 0
+    advanced = 1
+
+
+class SeparatorSpacing(Enum):
+    small = 1
+    large = 2
+
+
+class MediaItemLoadingState(Enum):
+    unknown = 0
+    loading = 1
+    loaded = 2
+    not_found = 3
+
+
+class CollectibleType(Enum):
+    nameplate = 'nameplate'
+
+
+class NameplatePalette(Enum):
+    crimson = 'crimson'
+    berry = 'berry'
+    sky = 'sky'
+    teal = 'teal'
+    forest = 'forest'
+    bubble_gum = 'bubble_gum'
+    violet = 'violet'
+    cobalt = 'cobalt'
+    clover = 'clover'
+    lemon = 'lemon'
+    white = 'white'
 
 
 def create_unknown_value(cls: Type[E], val: Any) -> E:

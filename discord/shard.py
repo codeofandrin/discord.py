@@ -41,6 +41,7 @@ from .errors import (
     ConnectionClosed,
     PrivilegedIntentsRequired,
 )
+from .utils import MISSING
 
 from .enums import Status
 
@@ -52,6 +53,12 @@ if TYPE_CHECKING:
     from .activity import BaseActivity
     from .flags import Intents
     from .types.gateway import SessionStartLimit
+    from .client import _ClientOptions
+
+    class _AutoShardedClientOptions(_ClientOptions, total=False):
+        shard_ids: List[int]
+        shard_connect_timeout: Optional[float]
+
 
 __all__ = (
     'AutoShardedClient',
@@ -313,7 +320,7 @@ class SessionStartLimits:
         The number of identify requests allowed per 5 seconds
     """
 
-    __slots__ = ("total", "remaining", "reset_after", "max_concurrency")
+    __slots__ = ('total', 'remaining', 'reset_after', 'max_concurrency')
 
     def __init__(self, **kwargs: Unpack[SessionStartLimit]):
         self.total: int = kwargs['total']
@@ -365,7 +372,7 @@ class AutoShardedClient(Client):
     if TYPE_CHECKING:
         _connection: AutoShardedConnectionState
 
-    def __init__(self, *args: Any, intents: Intents, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, intents: Intents, **kwargs: Unpack[_AutoShardedClientOptions]) -> None:
         kwargs.pop('shard_id', None)
         self.shard_ids: Optional[List[int]] = kwargs.pop('shard_ids', None)
         self.shard_connect_timeout: Optional[float] = kwargs.pop('shard_connect_timeout', 180.0)
@@ -383,6 +390,7 @@ class AutoShardedClient(Client):
         self.__shards = {}
         self._connection._get_websocket = self._get_websocket
         self._connection._get_client = lambda: self
+        self.__queue: asyncio.PriorityQueue = MISSING
 
     def _get_websocket(self, guild_id: Optional[int] = None, *, shard_id: Optional[int] = None) -> DiscordWebSocket:
         if shard_id is None:
@@ -548,7 +556,8 @@ class AutoShardedClient(Client):
                 await asyncio.wait(to_close)
 
             await self.http.close()
-            self.__queue.put_nowait(EventItem(EventType.clean_close, None, None))
+            if self.__queue is not MISSING:
+                self.__queue.put_nowait(EventItem(EventType.clean_close, None, None))
 
         self._closing_task = asyncio.create_task(_close())
         await self._closing_task

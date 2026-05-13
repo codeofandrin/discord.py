@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+
 from __future__ import annotations
 
 import re
@@ -48,7 +49,7 @@ if TYPE_CHECKING:
     from discord.mentions import AllowedMentions
     from discord.sticker import GuildSticker, StickerItem
     from discord.message import MessageReference, PartialMessage
-    from discord.ui import View
+    from discord.ui.view import BaseView, View, LayoutView
     from discord.types.interactions import ApplicationCommandInteractionData
     from discord.poll import Poll
 
@@ -70,7 +71,7 @@ MISSING: Any = discord.utils.MISSING
 
 
 T = TypeVar('T')
-CogT = TypeVar('CogT', bound="Cog")
+CogT = TypeVar('CogT', bound='Cog')
 
 if TYPE_CHECKING:
     P = ParamSpec('P')
@@ -258,6 +259,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
 
         bot: BotT = interaction.client
         data: ApplicationCommandInteractionData = interaction.data  # type: ignore
+        type_ = data.get('type', 1)
         if interaction.message is None:
             synthetic_payload = {
                 'id': interaction.id,
@@ -267,7 +269,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
                 'tts': False,
                 'pinned': False,
                 'edited_timestamp': None,
-                'type': MessageType.chat_input_command if data.get('type', 1) == 1 else MessageType.context_menu_command,
+                'type': MessageType.chat_input_command.value if type_ == 1 else MessageType.context_menu_command.value,
                 'flags': 64,
                 'content': '',
                 'mentions': [],
@@ -287,7 +289,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         else:
             message = interaction.message
 
-        prefix = '/' if data.get('type', 1) == 1 else '\u200b'  # Mock the prefix
+        prefix = '/' if type_ == 1 else '\u200b'  # Mock the prefix
         ctx = cls(
             message=message,
             bot=bot,
@@ -424,8 +426,8 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         # consider this to be an *incredibly* strange use case. I'd rather go
         # for this common use case rather than waste performance for the
         # odd one.
-        pattern = re.compile(r"<@!?%s>" % user.id)
-        return pattern.sub("@%s" % user.display_name.replace('\\', r'\\'), self.prefix)
+        pattern = re.compile(r'<@!?%s>' % user.id)
+        return pattern.sub('@%s' % user.display_name.replace('\\', r'\\'), self.prefix)
 
     @property
     def cog(self) -> Optional[Cog]:
@@ -631,6 +633,38 @@ class Context(discord.abc.Messageable, Generic[BotT]):
     @overload
     async def reply(
         self,
+        *,
+        file: File = ...,
+        delete_after: float = ...,
+        nonce: Union[str, int] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        reference: Union[Message, MessageReference, PartialMessage] = ...,
+        mention_author: bool = ...,
+        view: LayoutView,
+        suppress_embeds: bool = ...,
+        ephemeral: bool = ...,
+        silent: bool = ...,
+    ) -> Message: ...
+
+    @overload
+    async def reply(
+        self,
+        *,
+        files: Sequence[File] = ...,
+        delete_after: float = ...,
+        nonce: Union[str, int] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        reference: Union[Message, MessageReference, PartialMessage] = ...,
+        mention_author: bool = ...,
+        view: LayoutView,
+        suppress_embeds: bool = ...,
+        ephemeral: bool = ...,
+        silent: bool = ...,
+    ) -> Message: ...
+
+    @overload
+    async def reply(
+        self,
         content: Optional[str] = ...,
         *,
         tts: bool = ...,
@@ -647,8 +681,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         ephemeral: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def reply(
@@ -669,8 +702,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         ephemeral: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def reply(
@@ -691,8 +723,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         ephemeral: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def reply(
@@ -713,8 +744,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         ephemeral: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     async def reply(self, content: Optional[str] = None, **kwargs: Any) -> Message:
         """|coro|
@@ -820,6 +850,38 @@ class Context(discord.abc.Messageable, Generic[BotT]):
     @overload
     async def send(
         self,
+        *,
+        file: File = ...,
+        delete_after: float = ...,
+        nonce: Union[str, int] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        reference: Union[Message, MessageReference, PartialMessage] = ...,
+        mention_author: bool = ...,
+        view: LayoutView,
+        suppress_embeds: bool = ...,
+        ephemeral: bool = ...,
+        silent: bool = ...,
+    ) -> Message: ...
+
+    @overload
+    async def send(
+        self,
+        *,
+        files: Sequence[File] = ...,
+        delete_after: float = ...,
+        nonce: Union[str, int] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        reference: Union[Message, MessageReference, PartialMessage] = ...,
+        mention_author: bool = ...,
+        view: LayoutView,
+        suppress_embeds: bool = ...,
+        ephemeral: bool = ...,
+        silent: bool = ...,
+    ) -> Message: ...
+
+    @overload
+    async def send(
+        self,
         content: Optional[str] = ...,
         *,
         tts: bool = ...,
@@ -836,8 +898,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         ephemeral: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -858,8 +919,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         ephemeral: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -880,8 +940,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         ephemeral: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -902,8 +961,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         ephemeral: bool = ...,
         silent: bool = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     async def send(
         self,
@@ -920,7 +978,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
         allowed_mentions: Optional[AllowedMentions] = None,
         reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
         mention_author: Optional[bool] = None,
-        view: Optional[View] = None,
+        view: Optional[BaseView] = None,
         suppress_embeds: bool = False,
         ephemeral: bool = False,
         silent: bool = False,
@@ -986,7 +1044,7 @@ class Context(discord.abc.Messageable, Generic[BotT]):
             This is ignored for interaction based contexts.
 
             .. versionadded:: 1.6
-        view: :class:`discord.ui.View`
+        view: Union[:class:`discord.ui.View`, :class:`discord.ui.LayoutView`]
             A Discord UI View to add to the message.
 
             .. versionadded:: 2.0

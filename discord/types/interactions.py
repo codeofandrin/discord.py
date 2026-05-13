@@ -27,7 +27,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, List, Literal, TypedDict, Union, Optional
 from typing_extensions import NotRequired
 
-from .channel import ChannelTypeWithoutThread, GuildChannel, InteractionDMChannel, GroupDMChannel
+from .channel import (
+    ChannelTypeWithoutThread,
+    GuildChannel,
+    InteractionDMChannel,
+    GroupDMChannel,
+)
 from .sku import Entitlement
 from .threads import ThreadType, ThreadMetadata
 from .member import Member
@@ -36,6 +41,7 @@ from .role import Role
 from .snowflake import Snowflake
 from .user import User
 from .guild import GuildFeature
+from .components import ComponentBase
 
 if TYPE_CHECKING:
     from .message import Message
@@ -78,6 +84,14 @@ class PartialThread(_BasePartialChannel):
     type: ThreadType
     thread_metadata: ThreadMetadata
     parent_id: Snowflake
+    applied_tags: NotRequired[List[Snowflake]]
+    owner_id: Snowflake
+    message_count: int
+    member_count: int
+    rate_limit_per_user: int
+    last_message_id: NotRequired[Optional[Snowflake]]
+    flags: NotRequired[int]
+    total_message_sent: int
 
 
 class ResolvedData(TypedDict, total=False):
@@ -196,26 +210,81 @@ class SelectMessageComponentInteractionData(_BaseMessageComponentInteractionData
 MessageComponentInteractionData = Union[ButtonMessageComponentInteractionData, SelectMessageComponentInteractionData]
 
 
-class ModalSubmitTextInputInteractionData(TypedDict):
+class ModalSubmitTextInputInteractionData(ComponentBase):
     type: Literal[4]
     custom_id: str
     value: str
 
 
-ModalSubmitComponentItemInteractionData = ModalSubmitTextInputInteractionData
+class ModalSubmitSelectInteractionData(ComponentBase):
+    type: Literal[3, 5, 6, 7, 8]
+    custom_id: str
+    values: List[str]
+
+
+class ModalSubmitFileUploadInteractionData(ComponentBase):
+    type: Literal[19]
+    custom_id: str
+    values: List[str]
+
+
+class ModalSubmitRadioGroupInteractionData(ComponentBase):
+    type: Literal[21]
+    custom_id: str
+    id: int
+    value: Optional[str]
+
+
+class ModalSubmitCheckboxGroupInteractionData(ComponentBase):
+    type: Literal[22]
+    custom_id: str
+    id: int
+    values: List[str]
+
+
+class ModalSubmitCheckboxInteractionData(ComponentBase):
+    type: Literal[23]
+    custom_id: str
+    id: int
+    value: bool
+
+
+ModalSubmitLabelComponentItemInteractionData = Union[
+    ModalSubmitSelectInteractionData,
+    ModalSubmitTextInputInteractionData,
+    ModalSubmitFileUploadInteractionData,
+    ModalSubmitRadioGroupInteractionData,
+    ModalSubmitCheckboxGroupInteractionData,
+    ModalSubmitCheckboxInteractionData,
+]
 
 
 class ModalSubmitActionRowInteractionData(TypedDict):
     type: Literal[1]
-    components: List[ModalSubmitComponentItemInteractionData]
+    components: List[ModalSubmitTextInputInteractionData]
 
 
-ModalSubmitComponentInteractionData = Union[ModalSubmitActionRowInteractionData, ModalSubmitComponentItemInteractionData]
+class ModalSubmitTextDisplayInteractionData(ComponentBase):
+    type: Literal[10]
+    content: str
+
+
+class ModalSubmitLabelInteractionData(ComponentBase):
+    type: Literal[18]
+    component: ModalSubmitLabelComponentItemInteractionData
+
+
+ModalSubmitComponentInteractionData = Union[
+    ModalSubmitActionRowInteractionData,
+    ModalSubmitTextDisplayInteractionData,
+    ModalSubmitLabelInteractionData,
+]
 
 
 class ModalSubmitInteractionData(TypedDict):
     custom_id: str
     components: List[ModalSubmitComponentInteractionData]
+    resolved: NotRequired[ResolvedData]
 
 
 InteractionData = Union[
@@ -263,7 +332,12 @@ class ModalSubmitInteraction(_BaseInteraction):
     data: ModalSubmitInteractionData
 
 
-Interaction = Union[PingInteraction, ApplicationCommandInteraction, MessageComponentInteraction, ModalSubmitInteraction]
+Interaction = Union[
+    PingInteraction,
+    ApplicationCommandInteraction,
+    MessageComponentInteraction,
+    ModalSubmitInteraction,
+]
 
 
 class MessageInteraction(TypedDict):
@@ -311,7 +385,8 @@ class MessageComponentMessageInteractionMetadata(_MessageInteractionMetadata):
 class ModalSubmitMessageInteractionMetadata(_MessageInteractionMetadata):
     type: Literal[5]
     triggering_interaction_metadata: Union[
-        ApplicationCommandMessageInteractionMetadata, MessageComponentMessageInteractionMetadata
+        ApplicationCommandMessageInteractionMetadata,
+        MessageComponentMessageInteractionMetadata,
     ]
 
 
